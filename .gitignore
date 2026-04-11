@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Compilación distribuidor
+/dist
+/.angular
+
+# Logs y Caché
+*.log
+.npm
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Configuración local de entornos
+src/environments/environment.development.ts
