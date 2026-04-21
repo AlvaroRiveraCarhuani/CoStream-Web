@@ -1,1 +1,35 @@
-<p>stage works!</p>
+<div class="stage-container">
+
+    <div class="active-grid">
+        @for (participant of roomState.onStageParticipants(); track participant.userId) {
+        <div class="video-tile">
+            <div class="video-placeholder">
+                <span class="avatar">{{ participant.name.charAt(0) }}</span>
+            </div>
+            <div class="participant-info">
+                <span class="name">{{ participant.name }}</span>
+                <span class="role-badge" [class]="participant.role.toLowerCase()">
+                    {{ participant.role }}
+                </span>
+            </div>
+        </div>
+        } @empty {
+        <div class="empty-stage">
+            <p>El escenario está vacío</p>
+        </div>
+        }
+    </div>
+
+    <div class="backstage-bar">
+        <div class="backstage-header">Backstage</div>
+        <div class="backstage-list">
+            @for (participant of roomState.backstageParticipants(); track participant.userId) {
+            <div class="backstage-tile">
+                <span class="name">{{ participant.name }}</span>
+                <button class="btn-promote">Subir</button>
+            </div>
+            }
+        </div>
+    </div>
+
+</div>

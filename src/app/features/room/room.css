@@ -1,0 +1,90 @@
+/* Contenedor padre que ocupa el 100% de la pantalla sin scroll */
+.studio-container {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    /* El escenario toma el resto, el chat tiene tamaño fijo */
+    grid-template-rows: 1fr 72px;
+    /* La barra inferior mide 72px fijos */
+    grid-template-areas:
+        "main sidebar"
+        "footer footer";
+    height: 100vh;
+    width: 100vw;
+    background-color: #0c111a;
+    /* Fondo ultra oscuro empresarial */
+    color: #ffffff;
+    overflow: hidden;
+    font-family: 'Poppins', 'Montserrat', sans-serif;
+}
+
+/* Área del Escenario */
+.main-screen {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.stage-wrapper {
+    flex: 1;
+    display: flex;
+    background-color: #141b29;
+    /* Contenedor de video ligeramente más claro */
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Área del Chat Lateral */
+.sidebar-panel {
+    grid-area: sidebar;
+    background-color: #111823;
+    border-left: 1px solid #1f293d;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Área de la Barra de Controles Inferior */
+.controls-bar {
+    grid-area: footer;
+    background-color: #090d14;
+    border-top: 1px solid #1f293d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Estilos base para los botones de la interfaz */
+.btn-action {
+    background-color: #1f293d;
+    border: 1px solid #2d3b55;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-action:hover {
+    background-color: #2d3b55;
+}
+
+.btn-danger {
+    background-color: #e11d48;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-danger:hover {
+    background-color: #be123c;
+}
