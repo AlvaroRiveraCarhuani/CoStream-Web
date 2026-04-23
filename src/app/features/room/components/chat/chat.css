@@ -1,0 +1,116 @@
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #111823;
+}
+
+.chat-header {
+    padding: 16px;
+    border-bottom: 1px solid #1f293d;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+/* Área de mensajes con scroll independiente */
+.chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.empty-chat {
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+/* Estilos de la burbuja de mensaje */
+.message-bubble {
+    background-color: #1e293b;
+    padding: 12px;
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    /* Efecto de burbuja de chat */
+}
+
+.message-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.sender-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: #38bdf8;
+    /* Azul claro para los nombres */
+}
+
+.message-time {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.message-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+    /* Respeta los saltos de línea del texto crudo */
+}
+
+/* Área inferior de escritura */
+.chat-input-area {
+    padding: 16px;
+    border-top: 1px solid #1f293d;
+    background-color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-textarea {
+    width: 100%;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: white;
+    padding: 12px;
+    font-family: inherit;
+    resize: none;
+    /* Evita que el usuario rompa el layout arrastrando el textarea */
+    box-sizing: border-box;
+}
+
+.chat-textarea:focus {
+    outline: none;
+    border-color: #38bdf8;
+}
+
+.btn-send {
+    align-self: flex-end;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-send:hover {
+    background-color: #2563eb;
+}

@@ -1,1 +1,28 @@
-<p>chat works!</p>
+<div class="chat-container">
+
+    <header class="chat-header">
+        <h3>Chat de la Sala</h3>
+    </header>
+
+    <div class="chat-messages">
+        @for (msg of roomState.messages(); track msg.id) {
+        <div class="message-bubble">
+            <div class="message-meta">
+                <span class="sender-name">{{ msg.senderName }}</span>
+                <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
+            </div>
+            <div class="message-content" [innerHTML]="msg.content | markdown"></div>
+        </div>
+        } @empty {
+        <div class="empty-chat">
+            <p>No hay mensajes aún. ¡Rompe el hielo!</p>
+        </div>
+        }
+    </div>
+
+    <footer class="chat-input-area">
+        <textarea class="chat-textarea" placeholder="Escribe un mensaje o pega tu código..." rows="3"></textarea>
+        <button class="btn-send">Enviar</button>
+    </footer>
+
+</div>
