@@ -24,6 +24,8 @@
     flex-direction: column;
     padding: 16px;
     box-sizing: border-box;
+    min-height: 0; /* CANDADO APLICADO */
+    overflow: hidden; /* CANDADO APLICADO */
 }
 
 .stage-wrapper {
@@ -42,6 +44,8 @@
     border-left: 1px solid #1f293d;
     display: flex;
     flex-direction: column;
+    min-height: 0; /* CANDADO APLICADO */
+    overflow: hidden; /* CANDADO APLICADO */
 }
 
 /* Área de la Barra de Controles Inferior */

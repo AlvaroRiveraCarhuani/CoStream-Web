@@ -8,6 +8,10 @@ import { RoomStateService } from '../../services/room-state.service';
   styleUrl: './stage.css'
 })
 export class Stage {
-  // Inyectamos el servicio para leer quién está en el escenario y quién en backstage
   protected roomState = inject(RoomStateService);
+
+  // Esta función conecta la vista con el servicio
+  subirAlEscenario(userId: string) {
+    this.roomState.promoteToStage(userId);
+  }
 }
