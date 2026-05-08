@@ -22,6 +22,11 @@ export class Room implements OnInit, OnDestroy {
   roomId = '';
   isHost = false;
 
+  // --- ESTADOS DE LOS CONTROLES MULTIMEDIA ---
+  isMuted: boolean = false;
+  isCameraOff: boolean = false;
+  isScreenSharing: boolean = false;
+
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
     
@@ -29,6 +34,25 @@ export class Room implements OnInit, OnDestroy {
     this.isHost = !!user;
   }
 
+  // --- FUNCIONES DE CONTROLES MULTIMEDIA ---
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+  }
+
+  toggleCamera() {
+    this.isCameraOff = !this.isCameraOff;
+  }
+
+  toggleScreenShare() {
+    this.isScreenSharing = !this.isScreenSharing;
+  }
+
+  leaveRoom() {
+    console.log('Saliendo de la sala...');
+    // Aquí más adelante agregaremos la lógica para salir y volver al Dashboard
+  }
+
+  // --- CONTROL DE CIERRE DE SALA ---
   @HostListener('window:beforeunload', ['$event'])
   unloadHandler(event: Event) {
     if (this.isHost && this.roomId) {

@@ -12,10 +12,42 @@
 
     <footer class="controls-bar">
         <div class="control-buttons">
-            <button class="btn-action">Mute</button>
-            <button class="btn-action">Cámara</button>
-            <button class="btn-action">Compartir Pantalla</button>
-            <button class="btn-danger">Salir</button>
+            
+            <button class="btn-control" 
+                    [class.danger]="isMuted" 
+                    (click)="toggleMute()"
+                    [title]="isMuted ? 'Activar micrófono' : 'Desactivar micrófono'">
+                <span class="material-symbols-outlined">
+                    {{ isMuted ? 'mic_off' : 'mic' }}
+                </span>
+            </button>
+
+            <button class="btn-control" 
+                    [class.danger]="isCameraOff" 
+                    (click)="toggleCamera()"
+                    [title]="isCameraOff ? 'Activar cámara' : 'Desactivar cámara'">
+                <span class="material-symbols-outlined">
+                    {{ isCameraOff ? 'videocam_off' : 'videocam' }}
+                </span>
+            </button>
+
+            <button class="btn-control" 
+                    [class.active]="isScreenSharing" 
+                    (click)="toggleScreenShare()"
+                    [title]="isScreenSharing ? 'Dejar de compartir pantalla' : 'Compartir pantalla'">
+                <span class="material-symbols-outlined">
+                    present_to_all
+                </span>
+            </button>
+
+            <button class="btn-control leave" 
+                    (click)="leaveRoom()"
+                    title="Salir de la sala">
+                <span class="material-symbols-outlined">
+                    call_end
+                </span>
+            </button>
+
         </div>
     </footer>
 
