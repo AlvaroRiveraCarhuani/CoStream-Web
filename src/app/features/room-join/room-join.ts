@@ -18,13 +18,17 @@ export class RoomJoin implements OnInit {
   private fb = inject(FormBuilder);
   private roomApi = inject(RoomApiService);
   private authService = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef); // Inyección directa para control del DOM
+  private cdr = inject(ChangeDetectorRef);
 
   roomId = '';
   status: 'loading' | 'ready' | 'not-found' = 'loading';
   requiresPin = false;
   user = this.authService.currentUser();
   errorMessage = '';
+
+  // --- ESTADOS DE LOS BOTONES ---
+  isMuted = false;
+  isCameraOff = false;
 
   joinForm = this.fb.nonNullable.group({
     displayName: ['', Validators.required],
@@ -41,6 +45,7 @@ export class RoomJoin implements OnInit {
       this.joinForm.get('displayName')?.disable();
     }
 
+    // Lógica real de verificación del backend
     this.roomApi.checkRoomStatus(this.roomId).subscribe({
       next: (res) => {
         if (!res.exists) {
@@ -53,15 +58,22 @@ export class RoomJoin implements OnInit {
           }
           this.status = 'ready';
         }
-        // Forzamos el repintado inmediato de la interfaz
         this.cdr.detectChanges(); 
       },
       error: () => {
         this.status = 'not-found';
-        // Forzamos el repintado incluso si hay un error de red
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // --- FUNCIONES DE LOS BOTONES ---
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+  }
+
+  toggleCamera() {
+    this.isCameraOff = !this.isCameraOff;
   }
 
   onSubmit() {
@@ -70,6 +82,7 @@ export class RoomJoin implements OnInit {
     
     const formValue = this.joinForm.getRawValue();
     
+    // Lógica real de entrada a la sala
     this.roomApi.joinRoom({
       roomId: this.roomId,
       displayName: formValue.displayName,
@@ -80,8 +93,8 @@ export class RoomJoin implements OnInit {
         this.router.navigate(['/room', this.roomId]);
       },
       error: (err) => {
-         this.errorMessage = err.error?.message || 'Error al ingresar. Verifique el PIN.';
-         this.cdr.detectChanges(); 
+          this.errorMessage = err.error?.message || 'Error al ingresar. Verifique el PIN.';
+          this.cdr.detectChanges(); 
       }
     });
   }
