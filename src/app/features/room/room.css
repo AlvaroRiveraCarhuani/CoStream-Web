@@ -1,20 +1,27 @@
-/* Contenedor padre que ocupa el 100% de la pantalla sin scroll */
+/* --- CONTENEDOR PRINCIPAL DINÁMICO --- */
 .studio-container {
     display: grid;
-    grid-template-columns: 1fr 360px;
-    /* El escenario toma el resto, el chat tiene tamaño fijo */
-    grid-template-rows: 1fr 72px;
-    /* La barra inferior mide 72px fijos */
+    /* Por defecto, 1 sola columna ocupando todo el ancho */
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 80px; /* Barra inferior a 80px */
     grid-template-areas:
-        "main sidebar"
-        "footer footer";
+        "main"
+        "footer";
     height: 100vh;
     width: 100vw;
-    background-color: #0c111a;
-    /* Fondo ultra oscuro empresarial */
+    background-color: #0f172a; /* Fondo ultra oscuro más limpio */
     color: #ffffff;
     overflow: hidden;
     font-family: 'Poppins', 'Montserrat', sans-serif;
+    transition: grid-template-columns 0.3s ease;
+}
+
+/* Cuando el panel lateral está abierto (2 columnas) */
+.studio-container.has-sidebar {
+    grid-template-columns: 1fr 360px;
+    grid-template-areas:
+        "main sidebar"
+        "footer footer";
 }
 
 /* Área del Escenario */
@@ -24,51 +31,105 @@
     flex-direction: column;
     padding: 16px;
     box-sizing: border-box;
-    min-height: 0; /* CANDADO APLICADO */
-    overflow: hidden; /* CANDADO APLICADO */
+    min-height: 0;
+    overflow: hidden;
 }
 
 .stage-wrapper {
     flex: 1;
     display: flex;
-    background-color: #141b29;
-    /* Contenedor de video ligeramente más claro */
-    border-radius: 8px;
+    background-color: #1e293b;
+    border-radius: 12px;
     overflow: hidden;
 }
 
-/* Área del Chat Lateral */
+/* --- PANEL LATERAL --- */
 .sidebar-panel {
     grid-area: sidebar;
-    background-color: #111823;
-    border-left: 1px solid #1f293d;
+    background-color: #111827;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* CANDADO APLICADO */
-    overflow: hidden; /* CANDADO APLICADO */
+    min-height: 0;
+    overflow: hidden;
+    margin: 16px 16px 16px 0; /* Margen para estilo moderno separado del borde */
+    border-radius: 12px;
+    border: 1px solid #1f293d;
 }
 
-/* Área de la Barra de Controles Inferior */
-.controls-bar {
-    grid-area: footer;
-    background-color: #090d14;
-    border-top: 1px solid #1f293d;
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #1f293d;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background 0.2s;
 }
 
-/* --- BOTONES CIRCULARES (Estilo Meet/StreamYard) --- */
-.control-buttons {
+.close-btn:hover {
+    background-color: #1f293d;
+    color: white;
+}
+
+.sidebar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* --- BARRA DE CONTROLES INFERIOR --- */
+.controls-bar {
+    grid-area: footer;
+    background-color: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+}
+
+/* Se divide en 3 bloques de igual tamaño para centrar el del medio perfectamente */
+.footer-left, .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.footer-left { justify-content: flex-start; }
+.footer-right { justify-content: flex-end; }
+.footer-center {
     display: flex;
     gap: 16px;
+    justify-content: center;
+    flex: 1;
 }
 
+/* --- BOTONES CENTRALES CIRCULARES --- */
 .btn-control {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background-color: #334155; /* Gris oscuro por defecto */
+    background-color: #334155; 
     border: none;
     color: white;
     display: flex;
@@ -78,40 +139,110 @@
     transition: all 0.2s ease;
 }
 
-.btn-control:hover {
-    background-color: #475569;
-}
+.btn-control:hover { background-color: #475569; }
+.btn-control.danger { background-color: #e11d48; }
+.btn-control.danger:hover { background-color: #be123c; }
+.btn-control.active { background-color: #3b82f6; }
+.btn-control.active:hover { background-color: #2563eb; }
 
-/* Estado Peligro/Apagado (Rojo) */
-.btn-control.danger {
-    background-color: #e11d48;
-}
-
-.btn-control.danger:hover {
-    background-color: #be123c;
-}
-
-/* Estado Activo (Azul para compartir pantalla) */
-.btn-control.active {
-    background-color: #3b82f6;
-}
-
-.btn-control.active:hover {
-    background-color: #2563eb;
-}
-
-/* Botón de salir (Más ancho y siempre rojo) */
 .btn-control.leave {
     background-color: #e11d48;
     border-radius: 24px;
     width: 64px;
 }
+.btn-control.leave:hover { background-color: #be123c; }
 
-.btn-control.leave:hover {
-    background-color: #be123c;
+/* --- BOTONES DERECHOS (Iconos discretos estilo Meet) --- */
+.btn-side-toggle {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
 }
 
-/* Tamaño de los íconos importados */
-.material-symbols-outlined {
-    font-size: 24px;
+.btn-side-toggle:hover {
+    background-color: #1e293b;
+    color: white;
 }
+
+.btn-side-toggle.active {
+    color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.btn-side-toggle .badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 10px;
+}
+
+.material-symbols-outlined { font-size: 24px; }
+
+/* --- LISTA DE PARTICIPANTES --- */
+.participants-container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.participant-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.participant-left { display: flex; align-items: center; gap: 12px; }
+
+.p-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #1e293d;
+    border: 1px solid #334155;
+    color: #3b82f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.p-info { display: flex; flex-direction: column; gap: 2px; }
+.p-name { font-size: 14px; font-weight: 500; color: #f1f5f9; }
+
+.role-tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    width: max-content;
+    letter-spacing: 0.5px;
+}
+.role-tag.host { background-color: rgba(225, 29, 72, 0.15); color: #f43f5e; border: 1px solid rgba(225, 29, 72, 0.2); }
+.role-tag.presenter { background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+.role-tag.guest { background-color: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+
+.participant-hardware { display: flex; gap: 8px; }
+.status-icon { font-size: 18px; color: #94a3b8; }
+.status-icon.off { color: #e11d48; }

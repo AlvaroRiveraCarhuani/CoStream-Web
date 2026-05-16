@@ -5,11 +5,12 @@ import { RoomApiService } from '../../core/services/room-api';
 import { AuthService } from '../../core/services/auth';
 import { Stage } from './components/stage/stage';
 import { Chat } from './components/chat/chat';
+import { CommonModule } from '@angular/common'; // Necesario para ngIf y ngFor
 
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [Stage, Chat],
+  imports: [Stage, Chat, CommonModule],
   templateUrl: './room.html',
   styleUrl: './room.css',
 })
@@ -27,32 +28,44 @@ export class Room implements OnInit, OnDestroy {
   isCameraOff: boolean = false;
   isScreenSharing: boolean = false;
 
+  // --- ESTADOS DEL PANEL LATERAL (Estilo Google Meet) ---
+  isSidebarOpen: boolean = false; // Inicia cerrado para maximizar el video
+  activeTab: 'chat' | 'participants' = 'chat';
+
+  // --- DATOS SIMULADOS DE PARTICIPANTES ---
+  participants = [
+    { name: 'Rodrigo', role: 'HOST', isMuted: false, isCameraOff: false },
+    { name: 'Alvaro', role: 'PRESENTER', isMuted: false, isCameraOff: false },
+    { name: 'Invitado', role: 'GUEST', isMuted: true, isCameraOff: true }
+  ];
+
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
-    
     const user = this.authService.currentUser();
     this.isHost = !!user;
   }
 
   // --- FUNCIONES DE CONTROLES MULTIMEDIA ---
-  toggleMute() {
-    this.isMuted = !this.isMuted;
-  }
-
-  toggleCamera() {
-    this.isCameraOff = !this.isCameraOff;
-  }
-
-  toggleScreenShare() {
-    this.isScreenSharing = !this.isScreenSharing;
-  }
-
+  toggleMute() { this.isMuted = !this.isMuted; }
+  toggleCamera() { this.isCameraOff = !this.isCameraOff; }
+  toggleScreenShare() { this.isScreenSharing = !this.isScreenSharing; }
+  
   leaveRoom() {
     console.log('Saliendo de la sala...');
-    // Aquí más adelante agregaremos la lógica para salir y volver al Dashboard
   }
 
-  // --- CONTROL DE CIERRE DE SALA ---
+  // --- FUNCIÓN DEL PANEL LATERAL ---
+  toggleSidebar(tab: 'chat' | 'participants') {
+    if (this.isSidebarOpen && this.activeTab === tab) {
+      // Si haces clic en el botón de la pestaña actual, se cierra el panel
+      this.isSidebarOpen = false;
+    } else {
+      // Si está cerrado o clicas en el otro botón, se abre en la pestaña deseada
+      this.isSidebarOpen = true;
+      this.activeTab = tab;
+    }
+  }
+
   @HostListener('window:beforeunload', ['$event'])
   unloadHandler(event: Event) {
     if (this.isHost && this.roomId) {

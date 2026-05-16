@@ -1,4 +1,4 @@
-<div class="studio-container">
+<div class="studio-container" [class.has-sidebar]="isSidebarOpen">
 
     <main class="main-screen">
         <div class="stage-wrapper">
@@ -6,49 +6,80 @@
         </div>
     </main>
 
-    <aside class="sidebar-panel">
-        <app-chat></app-chat>
+    <aside class="sidebar-panel" *ngIf="isSidebarOpen">
+        
+        <div class="sidebar-header">
+            <h2>{{ activeTab === 'chat' ? 'Chat de la sala' : 'Participantes' }}</h2>
+            <button class="close-btn" (click)="isSidebarOpen = false">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <app-chat *ngIf="activeTab === 'chat'"></app-chat>
+
+            <div class="participants-container" *ngIf="activeTab === 'participants'">
+                <div class="participant-item" *ngFor="let p of participants">
+                    <div class="participant-left">
+                        <div class="p-avatar">{{ p.name.charAt(0) | uppercase }}</div>
+                        <div class="p-info">
+                            <span class="p-name">{{ p.name }}</span>
+                            <span class="role-tag" [ngClass]="p.role.toLowerCase()">{{ p.role }}</span>
+                        </div>
+                    </div>
+                    <div class="participant-hardware">
+                        <span class="material-symbols-outlined status-icon" [class.off]="p.isMuted">
+                            {{ p.isMuted ? 'mic_off' : 'mic' }}
+                        </span>
+                        <span class="material-symbols-outlined status-icon" [class.off]="p.isCameraOff">
+                            {{ p.isCameraOff ? 'videocam_off' : 'videocam' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </aside>
 
     <footer class="controls-bar">
-        <div class="control-buttons">
-            
-            <button class="btn-control" 
-                    [class.danger]="isMuted" 
-                    (click)="toggleMute()"
-                    [title]="isMuted ? 'Activar micrófono' : 'Desactivar micrófono'">
-                <span class="material-symbols-outlined">
-                    {{ isMuted ? 'mic_off' : 'mic' }}
-                </span>
+        
+        <div class="footer-left"></div>
+
+        <div class="footer-center">
+            <button class="btn-control" [class.danger]="isMuted" (click)="toggleMute()" [title]="isMuted ? 'Activar micrófono' : 'Desactivar micrófono'">
+                <span class="material-symbols-outlined">{{ isMuted ? 'mic_off' : 'mic' }}</span>
             </button>
 
-            <button class="btn-control" 
-                    [class.danger]="isCameraOff" 
-                    (click)="toggleCamera()"
-                    [title]="isCameraOff ? 'Activar cámara' : 'Desactivar cámara'">
-                <span class="material-symbols-outlined">
-                    {{ isCameraOff ? 'videocam_off' : 'videocam' }}
-                </span>
+            <button class="btn-control" [class.danger]="isCameraOff" (click)="toggleCamera()" [title]="isCameraOff ? 'Activar cámara' : 'Desactivar cámara'">
+                <span class="material-symbols-outlined">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
             </button>
 
-            <button class="btn-control" 
-                    [class.active]="isScreenSharing" 
-                    (click)="toggleScreenShare()"
-                    [title]="isScreenSharing ? 'Dejar de compartir pantalla' : 'Compartir pantalla'">
-                <span class="material-symbols-outlined">
-                    present_to_all
-                </span>
+            <button class="btn-control" [class.active]="isScreenSharing" (click)="toggleScreenShare()" [title]="isScreenSharing ? 'Dejar de compartir pantalla' : 'Compartir pantalla'">
+                <span class="material-symbols-outlined">present_to_all</span>
             </button>
 
-            <button class="btn-control leave" 
-                    (click)="leaveRoom()"
-                    title="Salir de la sala">
-                <span class="material-symbols-outlined">
-                    call_end
-                </span>
+            <button class="btn-control leave" (click)="leaveRoom()" title="Salir de la sala">
+                <span class="material-symbols-outlined">call_end</span>
             </button>
-
         </div>
+
+        <div class="footer-right">
+            <button class="btn-side-toggle" 
+                    [class.active]="isSidebarOpen && activeTab === 'participants'" 
+                    (click)="toggleSidebar('participants')" 
+                    title="Mostrar participantes">
+                <span class="material-symbols-outlined">group</span>
+                <span class="badge" *ngIf="participants.length > 0">{{ participants.length }}</span>
+            </button>
+
+            <button class="btn-side-toggle" 
+                    [class.active]="isSidebarOpen && activeTab === 'chat'" 
+                    (click)="toggleSidebar('chat')" 
+                    title="Chatear con todos">
+                <span class="material-symbols-outlined">chat</span>
+            </button>
+        </div>
+
     </footer>
 
 </div>
