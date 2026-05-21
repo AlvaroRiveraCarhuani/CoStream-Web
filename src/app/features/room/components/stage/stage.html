@@ -1,23 +1,34 @@
 <div class="stage-container">
 
-    <div class="active-grid">
-        @for (participant of roomState.onStageParticipants(); track participant.userId) {
-        <div class="video-tile">
-            <div class="video-placeholder">
-                <span class="avatar">{{ participant.name.charAt(0) }}</span>
-            </div>
-            <div class="participant-info">
-                <span class="name">{{ participant.name }}</span>
-                <span class="role-badge" [class]="participant.role.toLowerCase()">
-                    {{ participant.role }}
-                </span>
-            </div>
-        </div>
-        } @empty {
-        <div class="empty-stage">
-            <p>El escenario está vacío</p>
+    <div class="stage-main-area" [class.focus-mode]="isScreenSharing">
+
+        @if (isScreenSharing) {
+        <div class="presentation-screen">
+            <span class="material-symbols-outlined icon-giant">desktop_windows</span>
+            <h2>Sistema de Gestión de Cementerios</h2>
+            <p>Transmitiendo mapa municipal y gestión de impuestos...</p>
         </div>
         }
+
+        <div class="active-grid">
+            @for (participant of roomState.onStageParticipants(); track participant.userId) {
+            <div class="video-tile">
+                <div class="video-placeholder">
+                    <span class="avatar">{{ participant.name.charAt(0) | uppercase }}</span>
+                </div>
+                <div class="participant-info">
+                    <span class="name">{{ participant.name }}</span>
+                    <span class="role-badge" [class]="participant.role.toLowerCase()">
+                        {{ participant.role }}
+                    </span>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-stage">
+                <p>El escenario está vacío</p>
+            </div>
+            }
+        </div>
     </div>
 
     <div class="backstage-bar">
