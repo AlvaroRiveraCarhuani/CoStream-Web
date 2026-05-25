@@ -1,0 +1,20 @@
+<div class="landing-container">
+    <header class="landing-navbar">
+        <div class="brand">CoStream</div>
+        <a routerLink="/auth/login" class="btn-text">Iniciar Sesión</a>
+    </header> 
+
+  <main class="landing-content">
+    <div class="hero-section">
+      <h1>Tu espacio de transmisión profesional</h1>
+      <p>Únete a sesiones de live coding, defensas de proyectos y revisiones de arquitectura sin necesidad de registrarte.</p>
+      
+      <div class="join-card">
+        <form [formGroup]="joinForm" (ngSubmit)="onJoin()" class="join-form">
+          <input type="text" formControlName="roomId" placeholder="Introduce el ID de la reunión" autocomplete="off">
+          <button type="submit" class="btn-primary" [disabled]="joinForm.invalid">Unirse</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

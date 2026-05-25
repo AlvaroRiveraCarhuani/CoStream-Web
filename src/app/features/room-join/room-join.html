@@ -1,0 +1,37 @@
+<div class="join-wrapper">
+  
+  <div class="state-card" *ngIf="status === 'loading'">
+    <h2>Verificando enlace...</h2>
+  </div>
+
+  <div class="state-card error-state" *ngIf="status === 'not-found'">
+    <h2>Transmisión Finalizada</h2>
+    <p>Esta sala ya no existe o el enlace proporcionado es incorrecto.</p>
+    <a routerLink="/" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 0.75rem 2rem;">Volver al inicio</a>
+  </div>
+
+  <div class="state-card" *ngIf="status === 'ready'">
+    <h2>Unirse a la Sesión</h2>
+    <p class="subtitle">Sala ID: {{ roomId | slice:0:8 }}...</p>
+
+    <div class="error-alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <form [formGroup]="joinForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-group">
+        <label>Nombre a mostrar</label>
+        <input type="text" formControlName="displayName" placeholder="Ej. Estudiante 1">
+        <small *ngIf="user" class="info-text">Cuenta Oficial Verificada: {{ user.displayName }}</small>
+    </div>
+
+      <div class="form-group" *ngIf="requiresPin">
+        <label>PIN de Acceso <span class="badge">Privado</span></label>
+        <input type="password" formControlName="pin" placeholder="••••••">
+      </div>
+
+      <button type="submit" class="btn-primary w-full" [disabled]="joinForm.invalid">Entrar al Estudio</button>
+    </form>
+    
+    <a routerLink="/" class="btn-text cancel-link">Cancelar</a>
+  </div>
+</div>

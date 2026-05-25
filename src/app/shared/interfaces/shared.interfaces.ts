@@ -19,3 +19,40 @@ export interface RoomState {
 roomId: string;
 participants: RoomParticipant[];
 }
+export interface JwtPayload {
+  sub: string;
+  email: string;
+  role: UserRole;
+  displayName: string;
+  avatar: string; 
+  exp?: number;   
+}
+export interface AuthResponse {
+  accessToken: string;
+}
+
+export interface PublicRoom {
+  id: string;
+  title: string;
+  hostName: string;
+  createdAt: string;
+}
+
+export interface RoomHistory {
+  id: string;
+  title: string;
+  createdAt: string;
+  endedAt: string;
+  durationMinutes: number;
+  totalMessages: number;
+  totalParticipants: number;
+}
+
+export interface RoomJoinResponse {
+  roomId?: string;
+  success?: boolean;
+  hostToken?: string;
+  guestToken?: string;
+  livekitUrl: string;
+  assignedRole?: UserRole;
+}
