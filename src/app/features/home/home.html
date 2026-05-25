@@ -1,1 +1,136 @@
-<p>home works!</p>
+<div class="dashboard-container">
+  <header class="navbar">
+    <div class="brand">CoStream Studio</div>
+    <div class="user-profile">
+      <img [src]="user()?.avatar" alt="Avatar" class="avatar">
+      <span>{{ user()?.email }}</span>
+      <button class="btn-text" (click)="logout()">Salir</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="header-actions">
+      <h2>Panel de Control</h2>
+      <button class="btn-primary" (click)="openCreateModal()" [disabled]="roomApi.myActiveRoom() !== null">
+        + Nueva Transmisión
+      </button>
+    </div>
+
+    <div class="my-room-section" *ngIf="roomApi.myActiveRoom() as myRoom">
+      <h3 style="color: #10b981; margin-bottom: 1rem;">Mi Transmisión Activa</h3>
+      <div class="room-card highlight-card" style="border-color: #10b981; background: rgba(16, 185, 129, 0.05); margin-bottom: 2rem;">
+        <div class="room-info">
+          <h3>{{ myRoom.title }}</h3>
+          <p>
+            <span class="badge" [ngStyle]="{'background': myRoom.isPublic ? '#3b82f6' : '#64748b'}">
+              {{ myRoom.isPublic ? 'Pública' : 'Privada' }}
+            </span>
+            <span class="badge" *ngIf="myRoom.requiresPin" style="background: #ef4444; margin-left: 0.5rem; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">PIN Requerido</span>
+          </p>
+          <small style="display: block; margin-top: 0.5rem;">Inició: {{ myRoom.createdAt | date:'shortTime' }}</small>
+        </div>
+      <div class="actions" style="display: flex; gap: 0.5rem; width: 100%;">
+          <button class="btn-primary" (click)="goToMyRoom(myRoom.id)">Ir al Estudio</button>
+          
+          <button class="btn-copy" (click)="copyRoomLink(myRoom.id, $event)">
+            <span class="icon">📋</span>
+            <span class="label">Copiar Link</span>
+          </button>
+          <button class="btn-danger" (click)="endActiveRoom(myRoom.id)" style="background-color: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-left: auto; transition: all 0.2s;">
+            Finalizar Sesión
+            </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="community-section">
+      <h3 style="margin-bottom: 1rem;">Comunidad CoStream</h3>
+      <div class="rooms-grid">
+        <div class="room-card" *ngFor="let room of roomApi.publicRooms()">
+          <div class="room-info">
+            <h3>{{ room.title }}</h3>
+            <p>Host: {{ room.hostName || 'Usuario' }}</p>
+            <small>Inició: {{ room.createdAt | date:'shortTime' }}</small>
+          </div>
+          
+          <div class="actions">
+            <button class="btn-primary" (click)="openJoinModal(room.id)">Unirse</button>
+            <button class="btn-copy" (click)="copyRoomLink(room.id, $event)">
+              <span class="icon">📋</span>
+              <span class="label">Copiar Link</span>
+            </button>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="roomApi.publicRooms().length === 0">
+          No hay transmisiones públicas de la comunidad en este momento.
+        </div>
+      </div>
+    </div>
+
+    <div class="history-section" style="margin-top: 3rem;">
+      <h2>Historial de Sesiones</h2>
+      <table class="saas-table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Fecha</th>
+            <th>Duración (min)</th>
+            <th>Participantes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let session of roomApi.roomHistory()">
+            <td>{{ session.title }}</td>
+            <td>{{ session.createdAt | date:'shortDate' }}</td>
+            <td>{{ session.durationMinutes }}</td>
+            <td>{{ session.totalParticipants }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div class="modal-overlay" *ngIf="isCreateModalOpen">
+    <div class="modal">
+      <h3>Configurar Nueva Transmisión</h3>
+      <form [formGroup]="createForm" (ngSubmit)="onCreateSubmit()">
+        <div class="form-group">
+          <label>Título de la Sala</label>
+          <input type="text" formControlName="title" placeholder="Ej. Defensa de Proyecto">
+        </div>
+        <div class="form-row">
+          <label><input type="checkbox" formControlName="isPublic"> Sala Pública</label>
+          <label><input type="checkbox" formControlName="requiresPin"> Requiere PIN</label>
+        </div>
+        <div class="form-group" *ngIf="createForm.get('requiresPin')?.value">
+          <label>PIN de Acceso</label>
+          <input type="text" formControlName="pin" placeholder="12345">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-text" (click)="closeCreateModal()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="createForm.invalid || (createForm.get('requiresPin')?.value && !createForm.get('pin')?.value)">Iniciar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="isJoinModalOpen">
+    <div class="modal">
+      <h3>Unirse a la Transmisión</h3>
+      <form [formGroup]="joinForm" (ngSubmit)="onJoinSubmit()">
+        <div class="form-group">
+          <label>Mostrar nombre como</label>
+          <input type="text" formControlName="displayName">
+        </div>
+        <div class="form-group">
+          <label>PIN (si aplica)</label>
+          <input type="text" formControlName="pin" placeholder="Opcional">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-text" (click)="closeJoinModal()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="joinForm.invalid">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

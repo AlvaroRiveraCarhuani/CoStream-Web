@@ -1,0 +1,142 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #0f172a;
+  font-family: 'Poppins', 'Montserrat', sans-serif;
+  color: #f8fafc;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.brand { font-weight: 600; font-size: 1.25rem; color: #38bdf8; }
+
+.user-profile { display: flex; align-items: center; gap: 1rem; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; }
+
+.content { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-actions h2 { font-size: 1.5rem; font-weight: 500; }
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.room-card {
+  background-color: #1e293b;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.room-info h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+.room-info p { color: #94a3b8; font-size: 0.9rem; margin: 0 0 1rem 0; }
+.room-info small { color: #64748b; font-size: 0.8rem; }
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+  background-color: #1e293b;
+  border-radius: 8px;
+  border: 1px dashed #475569;
+}
+
+.history-section h2 { font-size: 1.5rem; font-weight: 500; margin-bottom: 1.5rem; }
+
+.saas-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.saas-table th, .saas-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+}
+
+.saas-table th {
+  background-color: #0f172a;
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.saas-table tr:hover td { background-color: #334155; }
+
+/* Botones y Formularios */
+.btn-primary {
+  background-color: #0284c7; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer;
+}
+.btn-primary:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
+.btn-secondary {
+  background-color: transparent; color: #38bdf8; border: 1px solid #38bdf8; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem;
+}
+.btn-text { background: none; border: none; color: #94a3b8; cursor: pointer; }
+.btn-text:hover { color: #f8fafc; }
+
+/* Modales */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.8);
+  display: flex; justify-content: center; align-items: center; z-index: 50;
+}
+
+.modal {
+  background-color: #1e293b; padding: 2rem; border-radius: 8px; width: 100%; max-width: 400px;
+  border: 1px solid #334155;
+}
+
+.modal h3 { margin-top: 0; margin-bottom: 1.5rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #cbd5e1; }
+.form-group input[type="text"] {
+  width: 100%; padding: 0.75rem; background-color: #0f172a; border: 1px solid #475569; border-radius: 4px; color: white; box-sizing: border-box;
+}
+.form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+.actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+
+.btn-copy { 
+  background-color: transparent; 
+  border: 1px solid #475569; 
+  color: #cbd5e1; 
+  padding: 0.5rem 0.8rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover { border-color: #38bdf8; color: #38bdf8; }
+
+/* El efecto "Copiado" que sustituye al alert feo */
+.btn-copy.copied { 
+  border-color: #10b981; 
+  color: #10b981; 
+}
