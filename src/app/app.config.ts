@@ -1,12 +1,23 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http'; // <-- IMPORTA ESTO
+import { provideRouter } from '@angular/router';
+import { provideHttpClient, withFetch, withInterceptors, HttpInterceptorFn } from '@angular/common/http';
 import { routes } from './app.routes';
-import { authGuard } from './core/guards/auth-guard';
-import { authInterceptor } from './core/interceptors/auth-interceptor';
+
+export const cookieAuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const secureReq = req.clone({
+    withCredentials: true
+  });
+  
+  return next(secureReq);
+};
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideBrowserGlobalErrorListeners(), 
+  providers: [
+    provideBrowserGlobalErrorListeners(), 
     provideRouter(routes), 
-    provideHttpClient(withInterceptors([authInterceptor]))],
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([cookieAuthInterceptor])
+    )
+  ],
 };
