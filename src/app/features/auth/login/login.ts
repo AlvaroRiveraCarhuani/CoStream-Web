@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
 
@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -23,6 +23,12 @@ export class Login {
 
   errorMessage = '';
 
+  ngOnInit() {
+    if (this.authService.currentUser()) {
+      this.router.navigate(['/dashboard'], { replaceUrl: true });
+    }
+  }
+
   onSubmit() {
     if (this.loginForm.invalid) return;
 
@@ -30,7 +36,10 @@ export class Login {
     
     this.authService.login(email, password).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.authService.checkSession().subscribe({
+          next: () => this.router.navigate(['/dashboard']),
+          error: () => this.errorMessage = 'Error al cargar el perfil de usuario'
+        });
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Error al iniciar sesión';
