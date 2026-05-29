@@ -1,14 +1,28 @@
-import { Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common'; // 1. Importamos la herramienta de fechas
+import { Component, inject, signal, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RoomStateService } from '../../services/room-state.service';
-import { MarkdownPipe } from '../../../../shared/pipes/markdown-pipe'; // <-- 1. Importamos el Pipe de Markdown
+import { MarkdownPipe } from '../../../../shared/pipes/markdown-pipe';
 
 @Component({
   selector: 'app-chat',
-  imports: [DatePipe, MarkdownPipe], // <-- 2. Le damos permiso al HTML para usarlo
+  standalone: true,
+  imports: [CommonModule, FormsModule, MarkdownPipe],
   templateUrl: './chat.html',
-  styleUrl: './chat.css'
+  styleUrls: ['./chat.css']
 })
 export class Chat {
+  @Input({ required: true }) roomId!: string;
+  
   protected roomState = inject(RoomStateService);
+  
+  chatInput = signal('');
+
+  onSendMessage() {
+    const text = this.chatInput();
+    if (text.trim() && this.roomId) {
+      this.roomState.sendMessage(this.roomId, text);
+      this.chatInput.set('');
+    }
+  }
 }

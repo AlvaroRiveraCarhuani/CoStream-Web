@@ -22,27 +22,36 @@ export class Login implements OnInit {
   });
 
   errorMessage = '';
+  isLoading = false;
 
   ngOnInit() {
-    if (this.authService.currentUser()) {
-      this.router.navigate(['/dashboard'], { replaceUrl: true });
-    }
+    // Si la cookie ya es válida, checkSession() disparará la carga del usuario
+    this.authService.checkSession().subscribe({
+      next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+      error: () => { /* Nos quedamos en el login */ }
+    });
   }
 
   onSubmit() {
     if (this.loginForm.invalid) return;
 
+    this.isLoading = true;
     const { email, password } = this.loginForm.getRawValue();
     
     this.authService.login(email, password).subscribe({
       next: () => {
+        // Al loguearse manualmente, la cookie ya se guardó. Ahora refrescamos el estado.
         this.authService.checkSession().subscribe({
           next: () => this.router.navigate(['/dashboard']),
-          error: () => this.errorMessage = 'Error al cargar el perfil de usuario'
+          error: () => {
+            this.isLoading = false;
+            this.errorMessage = 'Error al cargar perfil';
+          }
         });
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Error al iniciar sesión';
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Credenciales incorrectas';
       }
     });
   }

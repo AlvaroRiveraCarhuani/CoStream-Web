@@ -1,11 +1,14 @@
 export type UserRole = 'HOST' | 'PRESENTER' | 'VIEWER';
 
 export interface ChatMessage {
-id: string;          
-senderName: string;  
-role: UserRole;      
-content: string;     
-timestamp: string | Date; 
+  id: string;
+  senderId?: string;
+  senderName: string;
+  role?: string;
+  avatar?: string;    
+  text: string;             
+  type?: 'text' | 'image';
+  timestamp: string;
 }
 
 export interface RoomParticipant {

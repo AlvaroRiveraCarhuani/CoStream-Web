@@ -1,46 +1,83 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject, NgZone } from '@angular/core';
+import { io, Socket } from 'socket.io-client';
 import { RoomParticipant, ChatMessage } from '../../../shared/interfaces/shared.interfaces';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class RoomStateService {
-  // 1. Signals principales con datos simulados (Mocks)
-    participants = signal<RoomParticipant[]>([
-    { userId: 'u1', name: 'Rodrigo', role: 'HOST', isOnStage: true },
-    { userId: 'u2', name: 'Alvaro', role: 'PRESENTER', isOnStage: true },
-    { userId: 'u3', name: 'Invitado', role: 'PRESENTER', isOnStage: false },
-    { userId: 'u4', name: 'Espectador', role: 'VIEWER', isOnStage: false }
-    ]);
+  private socket!: Socket;
+  private zone = inject(NgZone);
 
-    messages = signal<ChatMessage[]>([
-    { 
-        id: 'm1', 
-        senderName: 'Rodrigo', 
-        role: 'HOST', 
-        content: 'Bienvenidos a la prueba de CoStream.', 
-        timestamp: new Date().toISOString() 
-    },
-    { 
-        id: 'm2', 
-        senderName: 'Alvaro', 
-        role: 'PRESENTER', 
-        content: '```typescript\nconsole.log("Señal WebRTC lista");\n```', 
-        timestamp: new Date().toISOString() 
-    }
-    ]);
+  // 1. Signals estrictamente tipadas
+  public participants = signal<RoomParticipant[]>([]);
+  public messages = signal<ChatMessage[]>([]);
 
-  // 2. Computed Signals (Filtros automáticos para la vista)
-    
-  // Lista de usuarios que deben renderizarse en el Grid central principal
-    onStageParticipants = computed(() => 
+  // 2. Computed Signals para el Stage
+  public onStageParticipants = computed(() => 
     this.participants().filter(p => p.isOnStage)
-    );
+  );
 
-  // Lista de usuarios en la barra inferior (excluye a los VIEWERS que no tienen cámara)
-    backstageParticipants = computed(() => 
+  public backstageParticipants = computed(() => 
     this.participants().filter(p => !p.isOnStage && p.role !== 'VIEWER')
-    );
+  );
 
-    constructor() {}
+  // 3. Motor de WebSockets
+  connect(roomId: string) {
+    this.socket = io('http://localhost:3000', {
+      withCredentials: true,
+      transports: ['websocket'],
+      upgrade: false
+    });
+
+    this.socket.on('connect', () => {
+      console.log('✅ Conectado al motor WebSocket de CoStream');
+      this.socket.emit('room:join', { roomId });
+    });
+
+    // Escuchar mensajes entrantes
+    this.socket.on('chat:broadcast', (message: ChatMessage) => {
+      console.log('📥 LLEGÓ UN MENSAJE:', message);
+      this.zone.run(() => {
+        this.messages.update(msgs => [...msgs, message]);
+      });
+    });
+
+    // Escuchar cuando alguien entra (mapear al formato esperado)
+    this.socket.on('room:participant_joined', (data) => {
+      // Importante: el backend envía user.id, no user.sub
+      const newParticipant: RoomParticipant = {
+        userId: data.user.id,
+        name: data.user.displayName || data.user.email.split('@')[0],
+        role: data.user.role || 'VIEWER',
+        isOnStage: false
+      };
+      this.zone.run(() => {
+        this.participants.update(users => [...users, newParticipant]);
+      });
+    });
+
+    // 🔥 NUEVO: Escuchar si el anfitrión cierra la sala (Grito de muerte)
+    this.socket.on('room:kicked', () => {
+      alert('El anfitrión ha finalizado la transmisión.');
+      this.zone.run(() => {
+        this.disconnect();
+        // Redirigir al dashboard. Puedes usar Router si lo prefieres, o window.location
+        window.location.href = '/dashboard';
+      });
+    });
+  }
+
+  sendMessage(roomId: string, text: string, type: 'text' | 'image' = 'text') {
+    if (this.socket && text.trim()) {
+      console.log('📤 ENVIANDO:', text);
+      this.socket.emit('chat:send', { roomId, text, type });
+    }
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  }
 }

@@ -11,7 +11,7 @@
                 <span class="sender-name">{{ msg.senderName }}</span>
                 <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
             </div>
-            <div class="message-content" [innerHTML]="msg.content | markdown"></div>
+            <div class="message-content" [innerHTML]="msg.text | markdown"></div>
         </div>
         } @empty {
         <div class="empty-chat">

@@ -1,0 +1,31 @@
+<div style="padding: 20px; font-family: monospace; background: #222; color: #0f0; min-height: 100vh;">
+  <h2>🧪 LAB DE PRUEBAS BACKEND (Aislado)</h2>
+  
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #0f0;">
+    <p><strong>SALA ID:</strong> {{ roomId }}</p>
+    <p><strong>MI ROL REAL:</strong> {{ isHost ? '👑 ANFITRIÓN (Creador)' : '👤 INVITADO' }}</p>
+    <button (click)="leaveRoom()" style="background: red; color: white; padding: 5px;">Salir de la Sala (Desconectar)</button>
+  </div>
+
+  <div style="display: flex; gap: 20px;">
+    <!-- CHAT BOX -->
+    <div style="flex: 1; border: 1px solid #0f0; padding: 10px;">
+      <h3>Mensajes (En tiempo real)</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li *ngFor="let msg of roomState.messages()" style="margin-bottom: 10px;">
+          <strong style="color: yellow;">{{ msg.senderName }}:</strong> {{ msg.text }}
+        </li>
+      </ul>
+      <div style="margin-top: 20px;">
+        <input 
+          [ngModel]="chatInput()" 
+          (ngModelChange)="chatInput.set($event)"
+          (keydown.enter)="onSendMessage(); $event.preventDefault()"
+          placeholder="Escribe un mensaje..."
+          style="width: 80%; padding: 5px; background: #000; color: #0f0; border: 1px solid #0f0;"
+        >
+        <button (click)="onSendMessage()" style="padding: 5px;">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -44,6 +44,11 @@ export class RoomApiService {
       error: () => this.myActiveRoom.set(null)
     });
   }
+  getRoomStatus(roomId: string): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/${roomId}/status`, {
+      withCredentials: true 
+    });
+  }
   endRoom(roomId: string) {
     return this.http.post(`${this.API_URL}/${roomId}/end`, {});
   }

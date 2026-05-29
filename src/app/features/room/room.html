@@ -1,22 +1,33 @@
 <div class="studio-container">
+  
+  <header class="room-header">
+    <div class="room-info">
+      <div class="pulse-indicator"></div>
+      <h2>Estudio Activo</h2>
+      <span class="badge host" *ngIf="isHost">ANFITRIÓN</span>
+      <span class="badge guest" *ngIf="!isHost">INVITADO</span>
+    </div>
+    <button class="btn-outline" (click)="copyRoomLink()">🔗 Copiar Enlace</button>
+  </header>
 
+  <div class="main-layout">
+    
     <main class="main-screen">
-        <div class="stage-wrapper">
-            <app-stage></app-stage>
-        </div>
+      <div class="stage-wrapper">
+        <app-stage></app-stage>
+      </div>
+      
+      <footer class="controls-bar">
+        <button class="btn-action">Mute</button>
+        <button class="btn-action">Cámara</button>
+        <button class="btn-action">Pantalla</button>
+        <button class="btn-danger" (click)="leaveRoom()">Salir del Estudio</button>
+      </footer>
     </main>
 
     <aside class="sidebar-panel">
-        <app-chat></app-chat>
+      <app-chat [roomId]="roomId" class="chat-component"></app-chat>
     </aside>
 
-    <footer class="controls-bar">
-        <div class="control-buttons">
-            <button class="btn-action">Mute</button>
-            <button class="btn-action">Cámara</button>
-            <button class="btn-action">Compartir Pantalla</button>
-            <button class="btn-danger">Salir</button>
-        </div>
-    </footer>
-
+  </div>
 </div>
