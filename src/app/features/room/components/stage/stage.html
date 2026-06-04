@@ -26,7 +26,7 @@
             @for (participant of roomState.backstageParticipants(); track participant.userId) {
             <div class="backstage-tile">
                 <span class="name">{{ participant.name }}</span>
-                <button class="btn-promote">Subir</button>
+                <button class="btn-promote" (click)="subirAlEscenario(participant.userId)">Subir</button>
             </div>
             }
         </div>

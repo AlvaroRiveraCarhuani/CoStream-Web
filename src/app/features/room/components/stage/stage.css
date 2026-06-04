@@ -1,39 +1,52 @@
+/* CANDADO DE ANGULAR */
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
 .stage-container {
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 /* --- ESCENARIO PRINCIPAL --- */
 .active-grid {
     flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    /* ESTA ES LA MAGIA: Crea columnas automáticas que nunca miden menos de 300px */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-content: center; /* Centra las cámaras verticalmente si son pocas */
     gap: 16px;
     padding: 16px;
     overflow-y: auto;
+    min-height: 0; /* Candado flexbox */
 }
 
 .empty-stage {
     color: #64748b;
     font-size: 1.2rem;
+    /* Centrar el texto cuando el grid está vacío */
+    grid-column: 1 / -1; 
+    text-align: center;
 }
 
 .video-tile {
     background-color: #1e293b;
     border-radius: 8px;
     width: 100%;
-    max-width: 400px;
+    /* Quitamos el max-width fijo para que el Grid decida el tamaño perfecto */
     aspect-ratio: 16/9;
-    /* Proporción estándar de video web */
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
     border: 1px solid #334155;
+    margin: 0 auto;
 }
 
 .video-placeholder {
@@ -97,6 +110,7 @@
     border-top: 1px solid #1e293b;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0; /* Evita que el backstage se aplaste si el grid crece mucho */
 }
 
 .backstage-header {

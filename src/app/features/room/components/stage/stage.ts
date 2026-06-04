@@ -3,11 +3,22 @@ import { RoomStateService } from '../../services/room-state.service';
 
 @Component({
   selector: 'app-stage',
+  standalone: true,
   imports: [],
   templateUrl: './stage.html',
-  styleUrl: './stage.css'
+  styleUrls: ['./stage.css']
 })
 export class Stage {
-  // Inyectamos el servicio para leer quién está en el escenario y quién en backstage
   protected roomState = inject(RoomStateService);
+
+  // Método temporal (evita el error)
+  promoteToStage(userId: string) {
+    console.log('Promote to stage:', userId);
+    // Aquí luego se implementará la lógica real
+  }
+
+  // Si había un método subirAlEscenario que usaba promoteToStage, lo corregimos
+  subirAlEscenario(userId: string) {
+    this.promoteToStage(userId);
+  }
 }

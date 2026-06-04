@@ -21,8 +21,14 @@
     </div>
 
     <footer class="chat-input-area">
-        <textarea class="chat-textarea" placeholder="Escribe un mensaje o pega tu código..." rows="3"></textarea>
-        <button class="btn-send">Enviar</button>
+        <textarea 
+            class="chat-textarea" 
+            placeholder="Escribe un mensaje o pega tu código..." 
+            rows="3"
+            [(ngModel)]="newMessage"
+            (keydown.enter)="handleEnter($event)"
+        ></textarea>
+        <button class="btn-send" (click)="sendMessage()">Enviar</button>
     </footer>
 
 </div>

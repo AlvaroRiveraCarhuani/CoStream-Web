@@ -1,5 +1,5 @@
-import { Component, inject, signal, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoomStateService } from '../../services/room-state.service';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown-pipe';
@@ -7,22 +7,26 @@ import { MarkdownPipe } from '../../../../shared/pipes/markdown-pipe';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, MarkdownPipe],
+  imports: [CommonModule, DatePipe, FormsModule, MarkdownPipe],
   templateUrl: './chat.html',
   styleUrls: ['./chat.css']
 })
 export class Chat {
   @Input({ required: true }) roomId!: string;
-  
-  protected roomState = inject(RoomStateService);
-  
-  chatInput = signal('');
 
-  onSendMessage() {
-    const text = this.chatInput();
-    if (text.trim() && this.roomId) {
-      this.roomState.sendMessage(this.roomId, text);
-      this.chatInput.set('');
+  protected roomState = inject(RoomStateService);
+  newMessage: string = '';
+
+  sendMessage() {
+    if (!this.newMessage.trim()) return;
+    this.roomState.sendMessage(this.roomId, this.newMessage);
+    this.newMessage = '';
+  }
+
+  handleEnter(event: any) {
+    if (!event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
     }
   }
 }

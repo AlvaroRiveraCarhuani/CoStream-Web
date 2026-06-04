@@ -1,9 +1,18 @@
+/* CANDADO DE ANGULAR APLICADO */
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
 .chat-container {
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 100%;
     background-color: #111823;
+    overflow: hidden; /* Evita que el contenedor entero se desborde */
 }
 
 .chat-header {
@@ -21,11 +30,16 @@
 /* Área de mensajes con scroll independiente */
 .chat-messages {
     flex: 1;
+    min-height: 0; /* LA CLAVE: Le dice al flex que puede ser más pequeño que su contenido, forzando el scroll */
     padding: 16px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    
+    /* Opcional: Hace que la barra de scroll se vea oscura y moderna */
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
 }
 
 .empty-chat {
