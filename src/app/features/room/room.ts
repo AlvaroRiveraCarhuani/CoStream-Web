@@ -28,10 +28,13 @@ export class Room implements OnInit, OnDestroy {
   isHost = false;
   chatInput = signal('');
 
-  // Estados multimedia
   isMuted = false;
   isCameraOff = false;
   isScreenSharing = false;
+  dropdownOpen = false;
+
+  // Control del panel de participantes
+  showParticipants = true;
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
@@ -56,12 +59,36 @@ export class Room implements OnInit, OnDestroy {
     }
   }
 
-  // Controles multimedia
+  // Getter para la lista de participantes (para facilitar el template)
+  get participantsList(): any[] {
+    return this.roomState.participants?.() ?? [];
+  }
+
+  get participantsCount(): number {
+    return this.participantsList.length;
+  }
+
+  // Método para traducir roles
+  getRoleLabel(role: string): string {
+    switch (role) {
+      case 'HOST': return 'Anfitrión';
+      case 'PRESENTER': return 'Presentador';
+      default: return 'Espectador';
+    }
+  }
+
+  trackByUserId(index: number, participant: any): string {
+    return participant.userId || participant.id;
+  }
+
+  toggleParticipantsPanel() {
+    this.showParticipants = !this.showParticipants;
+  }
+
   toggleMute() { this.isMuted = !this.isMuted; }
   toggleCamera() { this.isCameraOff = !this.isCameraOff; }
   toggleScreenShare() { this.isScreenSharing = !this.isScreenSharing; }
 
-  // Salir / Finalizar
   leaveRoom() {
     if (this.isHost) {
       if (confirm('¿Finalizar la transmisión? Se expulsará a todos los participantes.')) {
@@ -73,7 +100,7 @@ export class Room implements OnInit, OnDestroy {
             this.roomState.disconnect();
             this.router.navigate(['/dashboard']);
           },
-          error: (err) => console.error('Error al finalizar sala', err)
+          error: () => {}
         });
       }
     } else {
@@ -82,23 +109,30 @@ export class Room implements OnInit, OnDestroy {
     }
   }
 
-  // Copiar enlace de la sala
   copyRoomLink() {
     const url = `${window.location.origin}/join/${this.roomId}`;
-    navigator.clipboard.writeText(url).then(() => alert('Enlace copiado al portapapeles'));
+    navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'));
   }
 
-  // Envío de mensaje (se conecta con el chat si usas el input del room)
-  onSendMessage() {
-    const text = this.chatInput();
-    if (text.trim() && this.roomId) {
-      this.roomState.sendMessage(this.roomId, text);
-      this.chatInput.set('');
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  openSettings() {
+    this.dropdownOpen = false;
+    // Aquí puedes abrir un modal de configuración (por implementar)
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdown(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.dropdownOpen = false;
     }
   }
 
-  @HostListener('window:beforeunload', ['$event'])
-  unloadHandler(event: Event) {
+  @HostListener('window:beforeunload')
+  unloadHandler() {
     if (this.isHost && this.roomId && this.roomState['socket']) {
       this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
     }

@@ -1,130 +1,107 @@
-/* CANDADO DE ANGULAR APLICADO */
-:host {
-    display: block;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
 .chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    background-color: #111823;
-    overflow: hidden; /* Evita que el contenedor entero se desborde */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #111827;
 }
 
 .chat-header {
-    padding: 16px;
-    border-bottom: 1px solid #1f293d;
+  padding: 16px;
+  border-bottom: 1px solid #1e293b;
 }
-
 .chat-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #f1f5f9;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #94a3b8;
 }
 
-/* Área de mensajes con scroll independiente */
 .chat-messages {
-    flex: 1;
-    min-height: 0; /* LA CLAVE: Le dice al flex que puede ser más pequeño que su contenido, forzando el scroll */
-    padding: 16px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    
-    /* Opcional: Hace que la barra de scroll se vea oscura y moderna */
-    scrollbar-width: thin;
-    scrollbar-color: #334155 transparent;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-bubble {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 10px 14px;
+  max-width: 90%;
+  word-wrap: break-word;
+}
+.message-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.7rem;
+}
+.sender-name {
+  font-weight: 600;
+  color: #a78bfa;
+}
+.message-time {
+  color: #64748b;
+}
+.message-content {
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .empty-chat {
-    text-align: center;
-    color: #64748b;
-    font-size: 14px;
-    margin-top: 20px;
+  text-align: center;
+  color: #64748b;
+  padding: 24px;
 }
 
-/* Estilos de la burbuja de mensaje */
-.message-bubble {
-    background-color: #1e293b;
-    padding: 12px;
-    border-radius: 8px;
-    border-top-left-radius: 0;
-    /* Efecto de burbuja de chat */
-}
-
-.message-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.sender-name {
-    font-weight: bold;
-    font-size: 13px;
-    color: #38bdf8;
-    /* Azul claro para los nombres */
-}
-
-.message-time {
-    font-size: 11px;
-    color: #64748b;
-}
-
-.message-content {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #cbd5e1;
-    white-space: pre-wrap;
-    /* Respeta los saltos de línea del texto crudo */
-}
-
-/* Área inferior de escritura */
 .chat-input-area {
-    padding: 16px;
-    border-top: 1px solid #1f293d;
-    background-color: #0f172a;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  flex-shrink: 0;
+  border-top: 1px solid #1e293b;
+  padding: 12px;
+  background: #0f172a;
+  display: flex;
+  gap: 8px;
 }
-
 .chat-textarea {
-    width: 100%;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    color: white;
-    padding: 12px;
-    font-family: inherit;
-    resize: none;
-    /* Evita que el usuario rompa el layout arrastrando el textarea */
-    box-sizing: border-box;
+  flex: 1;
+  background: #1e293b;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 16px;
+  color: white;
+  font-size: 0.85rem;
+  resize: none;
+  font-family: inherit;
 }
-
 .chat-textarea:focus {
-    outline: none;
-    border-color: #38bdf8;
+  outline: none;
+  ring: 1px solid #8b5cf6;
 }
-
 .btn-send {
-    align-self: flex-end;
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 24px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  background: #8b5cf6;
+  border: none;
+  border-radius: 20px;
+  padding: 0 20px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-
 .btn-send:hover {
-    background-color: #2563eb;
+  background: #7c3aed;
+}
+/* Ajustes para highlight.js dentro del chat */
+.message-content pre {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.message-content code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
 }

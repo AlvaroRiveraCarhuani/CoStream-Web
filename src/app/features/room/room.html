@@ -1,17 +1,68 @@
 <div class="studio-container">
-  
   <header class="room-header">
     <div class="room-info">
       <div class="pulse-indicator"></div>
       <h2>Estudio Activo</h2>
-      <span class="badge host" *ngIf="isHost">ANFITRIÓN</span>
-      <span class="badge guest" *ngIf="!isHost">INVITADO</span>
+      <span class="badge" [class.host]="isHost" [class.guest]="!isHost">
+        {{ isHost ? 'ANFITRIÓN' : 'INVITADO' }}
+      </span>
     </div>
-    <button class="btn-outline" (click)="copyRoomLink()">🔗 Copiar Enlace</button>
+    <div class="header-actions">
+      <!-- Botón para mostrar/ocultar participantes -->
+      <button class="btn-icon" (click)="toggleParticipantsPanel()" title="Participantes">
+        <span class="material-symbols-outlined">group</span>
+      </button>
+      <div class="dropdown">
+        <button class="btn-icon" (click)="toggleDropdown()">more_vert</button>
+        <div class="dropdown-menu" *ngIf="dropdownOpen">
+          <button (click)="copyRoomLink()">
+            <span class="material-symbols-outlined">link</span>
+            Copiar enlace
+          </button>
+          <button *ngIf="isHost" (click)="openSettings()">
+            <span class="material-symbols-outlined">settings</span>
+            Configuración
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <div class="main-layout">
-    
+    <!-- Panel de participantes (colapsable) -->
+    <aside class="participants-panel" [class.collapsed]="!showParticipants">
+      <div class="panel-header">
+        <h3>Participantes ({{ participantsCount }})</h3>
+        <button class="btn-close" (click)="toggleParticipantsPanel()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="participants-list">
+        <ng-container *ngIf="participantsList.length > 0; else emptyList">
+          <div class="participant-item" *ngFor="let p of participantsList; trackBy: trackByUserId">
+            <div class="participant-avatar">
+              <span class="material-symbols-outlined">account_circle</span>
+            </div>
+            <div class="participant-info">
+              <span class="participant-name">{{ p.name || p.displayName || p.userId }}</span>
+              <span class="participant-role" [class]="(p.role || '').toLowerCase()">
+                {{ getRoleLabel(p.role) }}
+                <!-- 👑 Corona para el anfitrión -->
+                <span *ngIf="p.role === 'HOST'" class="crown">👑</span>
+              </span>
+            </div>
+            <div class="participant-status">
+              <span class="material-symbols-outlined">mic</span>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #emptyList>
+          <div class="empty-list">No hay otros participantes</div>
+        </ng-template>
+      </div>
+    </aside>
+
+    <!-- Contenido principal -->
     <main class="main-screen">
       <div class="stage-wrapper">
         <app-stage></app-stage>
@@ -19,39 +70,29 @@
       
       <footer class="controls-bar">
         <div class="control-buttons">
-          <button class="btn-control" 
-                  [class.danger]="isMuted" 
-                  (click)="toggleMute()"
-                  title="Micrófono">
+          <button class="btn-control" [class.danger]="isMuted" (click)="toggleMute()" title="Micrófono">
             <span class="material-symbols-outlined">{{ isMuted ? 'mic_off' : 'mic' }}</span>
           </button>
 
-          <button class="btn-control" 
-                  [class.danger]="isCameraOff" 
-                  (click)="toggleCamera()"
-                  title="Cámara">
+          <button class="btn-control" [class.danger]="isCameraOff" (click)="toggleCamera()" title="Cámara">
             <span class="material-symbols-outlined">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
           </button>
 
-          <button class="btn-control" 
-                  [class.active]="isScreenSharing" 
-                  (click)="toggleScreenShare()"
-                  title="Compartir pantalla">
+          <button class="btn-control" [class.active]="isScreenSharing" (click)="toggleScreenShare()" title="Compartir pantalla">
             <span class="material-symbols-outlined">present_to_all</span>
           </button>
 
-          <button class="btn-control leave" 
-                  (click)="leaveRoom()"
-                  title="Salir de la sala">
+          <button class="btn-control leave" (click)="leaveRoom()" title="Salir de la sala">
             <span class="material-symbols-outlined">call_end</span>
+            <span>Salir</span>
           </button>
         </div>
       </footer>
     </main>
 
+    <!-- Sidebar del chat (derecho) -->
     <aside class="sidebar-panel">
       <app-chat [roomId]="roomId" class="chat-component"></app-chat>
     </aside>
-
   </div>
 </div>

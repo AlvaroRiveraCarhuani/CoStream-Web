@@ -11,13 +11,10 @@ import { RoomStateService } from '../../services/room-state.service';
 export class Stage {
   protected roomState = inject(RoomStateService);
 
-  // Método temporal (evita el error)
   promoteToStage(userId: string) {
-    console.log('Promote to stage:', userId);
-    // Aquí luego se implementará la lógica real
+    // Aquí lógica para subir al escenario (socket)
   }
 
-  // Si había un método subirAlEscenario que usaba promoteToStage, lo corregimos
   subirAlEscenario(userId: string) {
     this.promoteToStage(userId);
   }

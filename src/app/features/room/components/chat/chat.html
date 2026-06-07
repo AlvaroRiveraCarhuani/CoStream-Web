@@ -1,34 +1,32 @@
 <div class="chat-container">
+  <div class="chat-header">
+    <h3>Chat de la Sala</h3>
+  </div>
 
-    <header class="chat-header">
-        <h3>Chat de la Sala</h3>
-    </header>
-
-    <div class="chat-messages">
-        @for (msg of roomState.messages(); track msg.id) {
-        <div class="message-bubble">
-            <div class="message-meta">
-                <span class="sender-name">{{ msg.senderName }}</span>
-                <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
-            </div>
-            <div class="message-content" [innerHTML]="msg.text | markdown"></div>
+  <div class="chat-messages" #messageContainer>
+    @for (msg of roomState.messages(); track msg.id) {
+      <div class="message-bubble">
+        <div class="message-meta">
+          <span class="sender-name">{{ msg.senderName }}</span>
+          <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
         </div>
-        } @empty {
-        <div class="empty-chat">
-            <p>No hay mensajes aún. ¡Rompe el hielo!</p>
-        </div>
-        }
-    </div>
+        <div class="message-content" [innerHTML]="msg.text | markdown"></div>
+      </div>
+    } @empty {
+      <div class="empty-chat">
+        <p>No hay mensajes aún. </p>
+      </div>
+    }
+  </div>
 
-    <footer class="chat-input-area">
-        <textarea 
-            class="chat-textarea" 
-            placeholder="Escribe un mensaje o pega tu código..." 
-            rows="3"
-            [(ngModel)]="newMessage"
-            (keydown.enter)="handleEnter($event)"
-        ></textarea>
-        <button class="btn-send" (click)="sendMessage()">Enviar</button>
-    </footer>
-
+  <footer class="chat-input-area">
+    <textarea 
+      class="chat-textarea" 
+      placeholder="Escribe un mensaje... (Shift+Enter salto de línea)"
+      rows="2"
+      [(ngModel)]="newMessage"
+      (keydown.enter)="handleEnter($event)"
+    ></textarea>
+    <button class="btn-send" (click)="sendMessage()">Enviar</button>
+  </footer>
 </div>
