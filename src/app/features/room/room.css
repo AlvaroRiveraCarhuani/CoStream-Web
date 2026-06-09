@@ -348,3 +348,34 @@
   margin-left: 4px;
   filter: drop-shadow(0 0 2px gold);
 }
+.video-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  background: #1e1e2f;
+  border-radius: 8px;
+}
+.local-video-wrapper {
+  position: relative;
+  width: 320px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.local-video-wrapper video {
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+.remote-videos-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1;
+}
+.remote-videos-wrapper video {
+  width: 300px;
+  background: #000;
+  border-radius: 8px;
+}

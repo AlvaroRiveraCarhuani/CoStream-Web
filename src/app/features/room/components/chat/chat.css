@@ -64,22 +64,30 @@
   background: #0f172a;
   display: flex;
   gap: 8px;
+  align-items: flex-end; /* Alinea los elementos por debajo en caso de que el textarea crezca */
 }
+
 .chat-textarea {
   flex: 1;
   background: #1e293b;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 20px;
   padding: 10px 16px;
   color: white;
   font-size: 0.85rem;
   resize: none;
   font-family: inherit;
-}
-.chat-textarea:focus {
+  min-height: 40px; /* Altura base predecible */
+  max-height: 120px; /* Límite si decides hacerlo auto-expandible con JS */
+  line-height: 1.4;
   outline: none;
-  ring: 1px solid #8b5cf6;
+  transition: border-color 0.2s;
 }
+
+.chat-textarea:focus {
+  border-color: #8b5cf6; /* Reemplaza el 'ring' inválido en CSS puro por un border */
+}
+
 .btn-send {
   background: #8b5cf6;
   border: none;
@@ -87,12 +95,25 @@
   padding: 0 20px;
   color: white;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
+  height: 40px; /* Misma altura base que el textarea */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* Evita que el texto del botón haga saltos de línea */
+  flex-shrink: 0; /* ¡Vital! Evita que el botón sea aplastado por el textarea */
 }
+
 .btn-send:hover {
   background: #7c3aed;
 }
+
+.btn-send:active {
+  transform: scale(0.96); /* Un pequeño efecto visual al hacer clic */
+}
+
 /* Ajustes para highlight.js dentro del chat */
 .message-content pre {
   background: #0f172a;
@@ -101,6 +122,7 @@
   overflow-x: auto;
   margin: 8px 0;
 }
+
 .message-content code {
   font-family: 'Fira Code', monospace;
   font-size: 0.85rem;

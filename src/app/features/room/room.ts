@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth';
 import { ChangeDetectorRef } from '@angular/core';
 import { Stage } from './components/stage/stage';
 import { Chat } from './components/chat/chat';
+import { LivekitService } from './services/livekit.service';  // ✅ Importado
 
 @Component({
   selector: 'app-room',
@@ -23,6 +24,7 @@ export class Room implements OnInit, OnDestroy {
   private roomApi = inject(RoomApiService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private livekitService = inject(LivekitService);  // ✅ Inyectado
 
   roomId = '';
   isHost = false;
@@ -53,6 +55,15 @@ export class Room implements OnInit, OnDestroy {
           const myId = user.sub || user.id;
           this.isHost = (roomData.creatorId === myId);
           this.cdr.detectChanges();
+
+          // ✅ Conectar a LiveKit usando el token guardado
+          const token = localStorage.getItem('livekit_token');
+          if (token) {
+            this.livekitService.connect(this.roomId, token, 'local-video', 'remote-videos')
+              .catch(err => console.error('Error conectando a LiveKit:', err));
+          } else {
+            console.error('No se encontró token de LiveKit en localStorage');
+          }
         },
         error: () => this.router.navigate(['/dashboard'])
       });
@@ -136,6 +147,8 @@ export class Room implements OnInit, OnDestroy {
     if (this.isHost && this.roomId && this.roomState['socket']) {
       this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
     }
+    // ✅ Desconectar LiveKit al cerrar pestaña
+    this.livekitService.disconnect();
   }
 
   ngOnDestroy() {
@@ -146,5 +159,7 @@ export class Room implements OnInit, OnDestroy {
       }
     }
     this.roomState.disconnect();
+    // ✅ Desconectar LiveKit al destruir el componente
+    this.livekitService.disconnect();
   }
 }

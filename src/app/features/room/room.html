@@ -67,6 +67,17 @@
       <div class="stage-wrapper">
         <app-stage></app-stage>
       </div>
+
+      <!-- 🎥 Contenedores de video para LiveKit -->
+      <div class="livekit-videos">
+        <div class="video-container">
+          <div class="local-video-wrapper">
+            <video id="local-video" autoplay muted playsinline></video>
+            <span>Tu cámara</span>
+          </div>
+          <div id="remote-videos" class="remote-videos-wrapper"></div>
+        </div>
+      </div>
       
       <footer class="controls-bar">
         <div class="control-buttons">
