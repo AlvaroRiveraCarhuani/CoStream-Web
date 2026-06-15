@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,6 @@ export class Login implements OnInit {
   isLoading = false;
 
   ngOnInit() {
-    // Si la cookie ya es válida, checkSession() disparará la carga del usuario
     this.authService.checkSession().subscribe({
       next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
       error: () => { /* Nos quedamos en el login */ }
@@ -40,7 +40,6 @@ export class Login implements OnInit {
     
     this.authService.login(email, password).subscribe({
       next: () => {
-        // Al loguearse manualmente, la cookie ya se guardó. Ahora refrescamos el estado.
         this.authService.checkSession().subscribe({
           next: () => this.router.navigate(['/dashboard']),
           error: () => {
@@ -57,6 +56,6 @@ export class Login implements OnInit {
   }
 
   loginWithGoogle() {
-    window.location.href = 'http://localhost:3000/api/auth/google';
+    window.location.href = `${environment.apiUrl}/auth/google`;
   }
 }
