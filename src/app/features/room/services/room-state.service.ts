@@ -3,14 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { io, Socket } from 'socket.io-client';
 import { RoomParticipant, ChatMessage } from '../../../shared/interfaces/shared.interfaces';
 import { LivekitService } from './livekit.service';
-
+import { environment } from '../../../../environments/environment'
 @Injectable({ providedIn: 'root' })
 export class RoomStateService {
   private socket!: Socket;
   private zone = inject(NgZone);
   private http = inject(HttpClient);
   private livekitService = inject(LivekitService);
-  private apiUrl = 'http://localhost:3000/api/rooms';
+  private apiUrl = `${environment.apiUrl}/rooms`;
 
   public participants = signal<RoomParticipant[]>([]);
   public messages = signal<ChatMessage[]>([]);
@@ -29,7 +29,7 @@ export class RoomStateService {
   }
 
   connect(roomId: string) {
-    this.socket = io('http://localhost:3000', {
+    this.socket = io(environment.socketUrl, {
       withCredentials: true,
       transports: ['websocket'],
       upgrade: false

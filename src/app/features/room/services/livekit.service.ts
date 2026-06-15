@@ -1,12 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Room, RoomEvent, Track, RemoteTrack, RemoteParticipant, LocalTrackPublication } from 'livekit-client';
-
+import { environment } from '../../../../environments/environment'
 @Injectable({ providedIn: 'root' })
 export class LivekitService {
   private room: Room | null = null;
   private localVideoElement: HTMLVideoElement | null = null;
   private remoteVideoContainer: HTMLElement | null = null;
-  private livekitUrl = 'wss://costream-qcj17wn6.livekit.cloud';
+  private livekitUrl = environment.livekitUrl;
 
   constructor(private zone: NgZone) {}
 

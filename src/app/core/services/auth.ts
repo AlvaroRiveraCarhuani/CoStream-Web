@@ -2,7 +2,7 @@ import { Component, Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-
+import { environment } from '../../../environments/environment';
 export interface AuthResponse {
   accessToken?: string;
   user?: any;
@@ -16,7 +16,7 @@ export class AuthService {
   private router = inject(Router);
 
   // Ajusta la URL base según tus entornos
-  private API_URL = 'http://localhost:3000/api'; 
+  private API_URL = `${environment.apiUrl}`;
   private TOKEN_KEY = 'costream_token';
 
   // Signal que maneja el estado global del usuario en Angular 21
