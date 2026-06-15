@@ -2,12 +2,14 @@ import { Injectable, signal, computed, inject, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { io, Socket } from 'socket.io-client';
 import { RoomParticipant, ChatMessage } from '../../../shared/interfaces/shared.interfaces';
+import { LivekitService } from './livekit.service';
 
 @Injectable({ providedIn: 'root' })
 export class RoomStateService {
   private socket!: Socket;
   private zone = inject(NgZone);
   private http = inject(HttpClient);
+  private livekitService = inject(LivekitService);
   private apiUrl = 'http://localhost:3000/api/rooms';
 
   public participants = signal<RoomParticipant[]>([]);
@@ -19,9 +21,7 @@ export class RoomStateService {
     try {
       const history = await this.http.get<any[]>(`${this.apiUrl}/${roomId}/messages`).toPromise();
       if (history && history.length) {
-        this.zone.run(() => {
-          this.messages.set(history);
-        });
+        this.zone.run(() => this.messages.set(history));
       }
     } catch (error) {
       console.error('Error al cargar historial de mensajes', error);
@@ -40,27 +40,25 @@ export class RoomStateService {
       await this.loadMessageHistory(roomId);
     });
 
-    // Historial de participantes actuales (al unirse)
     this.socket.on('room:current_participants', (participantsList: any[]) => {
       this.zone.run(() => {
         const mapped = participantsList.map(p => ({
           userId: p.user.id,
           name: p.user.displayName || p.user.email?.split('@')[0],
           role: p.user.role || 'VIEWER',
-          isOnStage: p.user.role === 'HOST' ? true : false, // Host al escenario
+          isOnStage: p.user.role === 'HOST',
         }));
         this.participants.set(mapped);
       });
     });
 
-    // Evitar duplicados al unirse un nuevo participante, y si es HOST, poner isOnStage = true
     this.socket.on('room:participant_joined', (data) => {
       const isHost = data.user.role === 'HOST';
       const newParticipant: RoomParticipant = {
         userId: data.user.id,
         name: data.user.displayName || data.user.email?.split('@')[0],
         role: data.user.role || 'VIEWER',
-        isOnStage: isHost, // ✅ Host al escenario automáticamente
+        isOnStage: isHost,
       };
       this.zone.run(() => {
         this.participants.update(users => {
@@ -84,15 +82,38 @@ export class RoomStateService {
       });
     });
 
-    // Mensajes de chat
     this.socket.on('chat:broadcast', (message: ChatMessage) => {
       this.zone.run(() => this.messages.update(msgs => [...msgs, message]));
+    });
+
+    // ========== LISTENERS DE MODERACIÓN ==========
+    // Escucha cuando el anfitrión fuerza el estado del micrófono
+    this.socket.on('force_microphone', (data: { enabled: boolean }) => {
+      console.log('force_microphone recibido:', data);
+      this.zone.run(async () => {
+        await this.livekitService.setMicrophoneEnabled(data.enabled);
+      });
+    });
+
+    // Escucha cuando el anfitrión fuerza el estado de la cámara
+    this.socket.on('force_camera', (data: { enabled: boolean }) => {
+      console.log('force_camera recibido:', data);
+      this.zone.run(async () => {
+        await this.livekitService.setCameraEnabled(data.enabled);
+      });
     });
   }
 
   sendMessage(roomId: string, text: string, type: 'text' | 'image' = 'text') {
     if (this.socket && text.trim()) {
       this.socket.emit('chat:send', { roomId, text, type });
+    }
+  }
+
+  // Método para enviar comandos de moderación (los usan los botones del anfitrión)
+  sendModCommand(event: string, data: any) {
+    if (this.socket) {
+      this.socket.emit(event, data);
     }
   }
 

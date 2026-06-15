@@ -1,11 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Room, RoomEvent, Track, RemoteTrack, RemoteParticipant, LocalTrackPublication, createLocalTracks } from 'livekit-client';
+import { Room, RoomEvent, Track, RemoteTrack, RemoteParticipant, LocalTrackPublication } from 'livekit-client';
 
 @Injectable({ providedIn: 'root' })
 export class LivekitService {
   private room: Room | null = null;
   private localVideoElement: HTMLVideoElement | null = null;
   private remoteVideoContainer: HTMLElement | null = null;
+  private livekitUrl = 'wss://costream-qcj17wn6.livekit.cloud';
 
   constructor(private zone: NgZone) {}
 
@@ -13,90 +14,89 @@ export class LivekitService {
     this.localVideoElement = document.getElementById(localVideoId) as HTMLVideoElement;
     this.remoteVideoContainer = document.getElementById(remoteContainerId);
 
-    if (!this.localVideoElement) {
-      console.error(`No se encontró el elemento con id "${localVideoId}"`);
-      return;
-    }
-    if (!this.remoteVideoContainer) {
-      console.error(`No se encontró el contenedor con id "${remoteContainerId}"`);
+    if (!this.localVideoElement || !this.remoteVideoContainer) {
+      console.error('Elementos de video no encontrados');
       return;
     }
 
     this.room = new Room({
-      publishDefaults: {
-        stopMicTrackOnMute: false,
-      },
+      publishDefaults: { stopMicTrackOnMute: false }
     });
 
     this.room.on(RoomEvent.LocalTrackPublished, (publication: LocalTrackPublication) => {
-      console.log('Track local publicado:', publication.kind);
+      if (publication.kind === Track.Kind.Video && publication.track) {
+        setTimeout(() => {
+          if (this.localVideoElement) {
+            publication.track?.attach(this.localVideoElement!);
+          }
+        }, 100);
+      }
     });
 
     this.room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
-      console.log('Track remoto suscrito:', track.kind, 'de', participant.identity);
       if (track.kind === Track.Kind.Video) {
-        const videoElement = document.createElement('video');
-        videoElement.autoplay = true;
-        videoElement.playsInline = true;
-        videoElement.muted = false;
-        videoElement.style.width = '300px';
-        videoElement.style.margin = '10px';
-        videoElement.setAttribute('data-participant-id', participant.identity);
-        track.attach(videoElement);
-        this.remoteVideoContainer!.appendChild(videoElement);
+        const videoEl = document.createElement('video');
+        videoEl.autoplay = true;
+        videoEl.playsInline = true;
+        videoEl.style.width = '300px';
+        videoEl.style.margin = '10px';
+        videoEl.setAttribute('data-participant-id', participant.identity);
+        track.attach(videoEl);
+        this.remoteVideoContainer!.appendChild(videoEl);
       }
     });
 
     this.room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
-      console.log('Track remoto eliminado:', track.kind, 'de', participant.identity);
       if (track.kind === Track.Kind.Video) {
-        const videoElement = this.remoteVideoContainer!.querySelector(`[data-participant-id="${participant.identity}"]`);
-        if (videoElement) videoElement.remove();
+        const el = this.remoteVideoContainer!.querySelector(`[data-participant-id="${participant.identity}"]`);
+        if (el) el.remove();
       }
     });
 
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
-      console.log('Participante desconectado:', participant.identity);
       const videos = this.remoteVideoContainer!.querySelectorAll(`[data-participant-id="${participant.identity}"]`);
       videos.forEach(v => v.remove());
     });
 
     try {
-      await this.room.connect('wss://costream-qcj17wn6.livekit.cloud', token);
-      console.log('Conectado a LiveKit, participantes:', this.room.numParticipants);
-
-      // 🔥 SOLUCIÓN PARA FLOORP: Pedir permisos de audio y video en una sola llamada
-      try {
-        console.log('Solicitando permisos unificados...');
-        
-        // Esto es lo que obligará a Floorp a mostrar la ventana emergente de permisos
-        const localTracks = await createLocalTracks({
-          audio: true,
-          video: true
-        });
-
-        for (const track of localTracks) {
-          // Publicamos cada track (audio y video) en la sala
-          await this.room.localParticipant.publishTrack(track);
-
-          if (track.kind === Track.Kind.Audio) {
-            console.log('Micrófono publicado correctamente');
-          }
-
-          if (track.kind === Track.Kind.Video) {
-            console.log('Cámara publicada correctamente');
-            // Adjuntamos el track de video al elemento HTML para verte a ti mismo
-            track.attach(this.localVideoElement!);
-          }
-        }
-      } catch (mediaError) {
-        // Si rechazas el permiso o hay un error de hardware, caerá aquí
-        console.error('Error al obtener permisos o publicar medios:', mediaError);
-        alert('Por favor, permite el acceso a la cámara y el micrófono en el icono del candado en la barra de direcciones.');
+      await this.room.connect(this.livekitUrl, token);
+      console.log('Conectado a LiveKit');
+      // Asegurar que los tracks se publican
+      if (!this.room.localParticipant.isMicrophoneEnabled) {
+        await this.room.localParticipant.setMicrophoneEnabled(true);
       }
-    } catch (error) {
-      console.error('Error al conectar a LiveKit:', error);
-      throw error;
+      if (!this.room.localParticipant.isCameraEnabled) {
+        await this.room.localParticipant.setCameraEnabled(true);
+      }
+    } catch (err) {
+      console.error('Error conectando a LiveKit', err);
+      throw err;
+    }
+  }
+
+  async toggleMicrophone(): Promise<boolean> {
+    if (!this.room) return false;
+    const newState = !this.room.localParticipant.isMicrophoneEnabled;
+    await this.room.localParticipant.setMicrophoneEnabled(newState);
+    return newState;
+  }
+
+  async toggleCamera(): Promise<boolean> {
+    if (!this.room) return false;
+    const newState = !this.room.localParticipant.isCameraEnabled;
+    await this.room.localParticipant.setCameraEnabled(newState);
+    return newState;
+  }
+
+  async setMicrophoneEnabled(enabled: boolean): Promise<void> {
+    if (this.room) {
+      await this.room.localParticipant.setMicrophoneEnabled(enabled);
+    }
+  }
+
+  async setCameraEnabled(enabled: boolean): Promise<void> {
+    if (this.room) {
+      await this.room.localParticipant.setCameraEnabled(enabled);
     }
   }
 
@@ -105,12 +105,7 @@ export class LivekitService {
       this.room.disconnect();
       this.room = null;
     }
-    if (this.remoteVideoContainer) {
-      this.remoteVideoContainer.innerHTML = '';
-    }
-    if (this.localVideoElement) {
-      // Es buena práctica limpiar también el srcObject del video local al desconectar
-      this.localVideoElement.srcObject = null;
-    }
+    if (this.remoteVideoContainer) this.remoteVideoContainer.innerHTML = '';
+    if (this.localVideoElement) this.localVideoElement.srcObject = null;
   }
 }

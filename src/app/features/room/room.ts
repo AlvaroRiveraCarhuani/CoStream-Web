@@ -1,14 +1,13 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, HostListener, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RoomStateService } from './services/room-state.service';
 import { RoomApiService } from '../../core/services/room-api';
 import { AuthService } from '../../core/services/auth';
-import { ChangeDetectorRef } from '@angular/core';
 import { Stage } from './components/stage/stage';
 import { Chat } from './components/chat/chat';
-import { LivekitService } from './services/livekit.service';  // ✅ Importado
+import { LivekitService } from './services/livekit.service';
 
 @Component({
   selector: 'app-room',
@@ -24,7 +23,7 @@ export class Room implements OnInit, OnDestroy {
   private roomApi = inject(RoomApiService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
-  private livekitService = inject(LivekitService);  // ✅ Inyectado
+  private livekitService = inject(LivekitService);
 
   roomId = '';
   isHost = false;
@@ -34,9 +33,20 @@ export class Room implements OnInit, OnDestroy {
   isCameraOff = false;
   isScreenSharing = false;
   dropdownOpen = false;
-
-  // Control del panel de participantes
   showParticipants = true;
+
+  get currentUserId(): string {
+    const user = this.authService.currentUser();
+    return user?.sub || user?.id || '';
+  }
+
+  get participantsList(): any[] {
+    return this.roomState.participants?.() ?? [];
+  }
+
+  get participantsCount(): number {
+    return this.participantsList.length;
+  }
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
@@ -52,17 +62,13 @@ export class Room implements OnInit, OnDestroy {
           }
 
           this.roomState.connect(this.roomId);
-          const myId = user.sub || user.id;
-          this.isHost = (roomData.creatorId === myId);
+          this.isHost = (roomData.creatorId === this.currentUserId);
           this.cdr.detectChanges();
 
-          // ✅ Conectar a LiveKit usando el token guardado
           const token = localStorage.getItem('livekit_token');
           if (token) {
             this.livekitService.connect(this.roomId, token, 'local-video', 'remote-videos')
               .catch(err => console.error('Error conectando a LiveKit:', err));
-          } else {
-            console.error('No se encontró token de LiveKit en localStorage');
           }
         },
         error: () => this.router.navigate(['/dashboard'])
@@ -70,16 +76,6 @@ export class Room implements OnInit, OnDestroy {
     }
   }
 
-  // Getter para la lista de participantes (para facilitar el template)
-  get participantsList(): any[] {
-    return this.roomState.participants?.() ?? [];
-  }
-
-  get participantsCount(): number {
-    return this.participantsList.length;
-  }
-
-  // Método para traducir roles
   getRoleLabel(role: string): string {
     switch (role) {
       case 'HOST': return 'Anfitrión';
@@ -96,9 +92,21 @@ export class Room implements OnInit, OnDestroy {
     this.showParticipants = !this.showParticipants;
   }
 
-  toggleMute() { this.isMuted = !this.isMuted; }
-  toggleCamera() { this.isCameraOff = !this.isCameraOff; }
-  toggleScreenShare() { this.isScreenSharing = !this.isScreenSharing; }
+  async toggleMute() {
+    const newState = await this.livekitService.toggleMicrophone();
+    this.isMuted = !newState;
+    this.cdr.detectChanges();
+  }
+
+  async toggleCamera() {
+    const newState = await this.livekitService.toggleCamera();
+    this.isCameraOff = !newState;
+    this.cdr.detectChanges();
+  }
+
+  toggleScreenShare() {
+    this.isScreenSharing = !this.isScreenSharing;
+  }
 
   leaveRoom() {
     if (this.isHost) {
@@ -109,6 +117,7 @@ export class Room implements OnInit, OnDestroy {
         this.roomApi.endRoom(this.roomId).subscribe({
           next: () => {
             this.roomState.disconnect();
+            this.livekitService.disconnect();
             this.router.navigate(['/dashboard']);
           },
           error: () => {}
@@ -116,6 +125,7 @@ export class Room implements OnInit, OnDestroy {
       }
     } else {
       this.roomState.disconnect();
+      this.livekitService.disconnect();
       this.router.navigate(['/dashboard']);
     }
   }
@@ -131,7 +141,35 @@ export class Room implements OnInit, OnDestroy {
 
   openSettings() {
     this.dropdownOpen = false;
-    // Aquí puedes abrir un modal de configuración (por implementar)
+  }
+
+  // ========== MÉTODOS DE MODERACIÓN ==========
+  muteRemoteParticipant(targetUserId: string, mute: boolean) {
+    if (!this.isHost) return;
+    this.roomState.sendModCommand('mod:set_microphone', {
+      roomId: this.roomId,
+      targetUserId,
+      enabled: !mute
+    });
+  }
+
+  setRemoteCamera(targetUserId: string, enabled: boolean) {
+    if (!this.isHost) return;
+    this.roomState.sendModCommand('mod:set_camera', {
+      roomId: this.roomId,
+      targetUserId,
+      enabled
+    });
+  }
+
+  kickParticipant(targetUserId: string) {
+    if (!this.isHost) return;
+    if (confirm('¿Expulsar a este participante?')) {
+      this.roomState.sendModCommand('mod:kick', {
+        roomId: this.roomId,
+        targetUserId
+      });
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -147,8 +185,6 @@ export class Room implements OnInit, OnDestroy {
     if (this.isHost && this.roomId && this.roomState['socket']) {
       this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
     }
-    // ✅ Desconectar LiveKit al cerrar pestaña
-    this.livekitService.disconnect();
   }
 
   ngOnDestroy() {
@@ -159,7 +195,6 @@ export class Room implements OnInit, OnDestroy {
       }
     }
     this.roomState.disconnect();
-    // ✅ Desconectar LiveKit al destruir el componente
     this.livekitService.disconnect();
   }
 }

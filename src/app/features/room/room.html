@@ -8,7 +8,6 @@
       </span>
     </div>
     <div class="header-actions">
-      <!-- Botón para mostrar/ocultar participantes -->
       <button class="btn-icon" (click)="toggleParticipantsPanel()" title="Participantes">
         <span class="material-symbols-outlined">group</span>
       </button>
@@ -29,7 +28,6 @@
   </header>
 
   <div class="main-layout">
-    <!-- Panel de participantes (colapsable) -->
     <aside class="participants-panel" [class.collapsed]="!showParticipants">
       <div class="panel-header">
         <h3>Participantes ({{ participantsCount }})</h3>
@@ -47,12 +45,19 @@
               <span class="participant-name">{{ p.name || p.displayName || p.userId }}</span>
               <span class="participant-role" [class]="(p.role || '').toLowerCase()">
                 {{ getRoleLabel(p.role) }}
-                <!-- 👑 Corona para el anfitrión -->
                 <span *ngIf="p.role === 'HOST'" class="crown">👑</span>
               </span>
             </div>
-            <div class="participant-status">
-              <span class="material-symbols-outlined">mic</span>
+            <div class="participant-actions" *ngIf="isHost && p.userId !== currentUserId">
+              <button (click)="muteRemoteParticipant(p.userId, true)" title="Mutear">
+                <span class="material-symbols-outlined">mic_off</span>
+              </button>
+              <button (click)="setRemoteCamera(p.userId, false)" title="Apagar cámara">
+                <span class="material-symbols-outlined">videocam_off</span>
+              </button>
+              <button (click)="kickParticipant(p.userId)" title="Expulsar">
+                <span class="material-symbols-outlined">logout</span>
+              </button>
             </div>
           </div>
         </ng-container>
@@ -62,17 +67,19 @@
       </div>
     </aside>
 
-    <!-- Contenido principal -->
     <main class="main-screen">
       <div class="stage-wrapper">
         <app-stage></app-stage>
       </div>
 
-      <!-- 🎥 Contenedores de video para LiveKit -->
       <div class="livekit-videos">
         <div class="video-container">
           <div class="local-video-wrapper">
             <video id="local-video" autoplay muted playsinline></video>
+            <div class="video-placeholder" *ngIf="isCameraOff">
+              <span class="material-symbols-outlined">videocam_off</span>
+              <span>Cámara apagada</span>
+            </div>
             <span>Tu cámara</span>
           </div>
           <div id="remote-videos" class="remote-videos-wrapper"></div>
@@ -84,15 +91,12 @@
           <button class="btn-control" [class.danger]="isMuted" (click)="toggleMute()" title="Micrófono">
             <span class="material-symbols-outlined">{{ isMuted ? 'mic_off' : 'mic' }}</span>
           </button>
-
           <button class="btn-control" [class.danger]="isCameraOff" (click)="toggleCamera()" title="Cámara">
             <span class="material-symbols-outlined">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
           </button>
-
           <button class="btn-control" [class.active]="isScreenSharing" (click)="toggleScreenShare()" title="Compartir pantalla">
             <span class="material-symbols-outlined">present_to_all</span>
           </button>
-
           <button class="btn-control leave" (click)="leaveRoom()" title="Salir de la sala">
             <span class="material-symbols-outlined">call_end</span>
             <span>Salir</span>
@@ -101,7 +105,6 @@
       </footer>
     </main>
 
-    <!-- Sidebar del chat (derecho) -->
     <aside class="sidebar-panel">
       <app-chat [roomId]="roomId" class="chat-component"></app-chat>
     </aside>
