@@ -12,8 +12,16 @@ export const cookieAuthInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
+  // Construir la request con withCredentials (para cookies) Y Bearer (para localStorage)
+  const token = authService.getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const secureReq = req.clone({
-    withCredentials: true
+    withCredentials: true,
+    setHeaders: headers
   });
   
   return next(secureReq).pipe(

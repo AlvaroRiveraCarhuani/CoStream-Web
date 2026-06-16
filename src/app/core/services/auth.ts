@@ -1,4 +1,4 @@
-import { Component, Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
@@ -26,7 +26,7 @@ export class AuthService {
     this.checkInitialAuth();
   }
 
-  // 1. LOGIN TRADICIONAL (Mantiene compatibilidad si responde con Token o Cookie)
+  // 1. LOGIN TRADICIONAL — guarda el token en localStorage para auth con Bearer
   login(email: string, passwordPlain: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, {
       email,
@@ -34,7 +34,7 @@ export class AuthService {
     }).pipe(
       tap(response => {
         if (response.accessToken) {
-          this.processToken(response.accessToken);
+          this.saveToken(response.accessToken);
         }
         if (response.user) {
           this.currentUser.set(response.user);
@@ -65,9 +65,8 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  // --- MÉTODOS PRIVADOS DE CONTROL INTERNAL ---
-
-  private processToken(token: string): void {
+  // Guarda el JWT en localStorage (usado por Google OAuth y login tradicional)
+  saveToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
