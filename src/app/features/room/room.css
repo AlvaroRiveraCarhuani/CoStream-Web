@@ -1,3 +1,4 @@
+/* ========== CONTENEDOR PRINCIPAL DINÁMICO ========== */
 .studio-container {
   display: flex;
   flex-direction: column;
@@ -5,9 +6,10 @@
   background: #0f172a;
   color: #f1f5f9;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  overflow: hidden;
+  overflow: hidden; /* VITAL: Bloquea el scroll de toda la página */
 }
 
+/* ========== HEADER ========== */
 .room-header {
   display: flex;
   justify-content: space-between;
@@ -55,14 +57,8 @@
   font-weight: 600;
   text-transform: uppercase;
 }
-.badge.host {
-  background: #8b5cf6;
-  color: white;
-}
-.badge.guest {
-  background: #334155;
-  color: #cbd5e1;
-}
+.badge.host { background: #8b5cf6; color: white; }
+.badge.guest { background: #334155; color: #cbd5e1; }
 
 .header-actions {
   display: flex;
@@ -118,23 +114,19 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.dropdown-menu button:hover {
-  background: #334155;
-}
-.dropdown-menu .material-symbols-outlined {
-  font-size: 20px;
-}
+.dropdown-menu button:hover { background: #334155; }
+.dropdown-menu .material-symbols-outlined { font-size: 20px; }
 
 /* ========== MAIN LAYOUT ========== */
 .main-layout {
   display: flex;
   flex: 1;
   gap: 0;
-  overflow: hidden;
   height: calc(100vh - 64px);
+  overflow: hidden; /* VITAL: Aísla las 3 columnas para que no se desborden */
 }
 
-/* ========== PANEL DE PARTICIPANTES (COLAPSABLE) ========== */
+/* ========== PANEL DE PARTICIPANTES ========== */
 .participants-panel {
   width: 280px;
   background: #1e293b;
@@ -159,13 +151,7 @@
   padding: 16px;
   border-bottom: 1px solid #334155;
 }
-
-.panel-header h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #cbd5e1;
-}
+.panel-header h3 { margin: 0; font-size: 1rem; font-weight: 500; color: #cbd5e1; }
 
 .btn-close {
   background: transparent;
@@ -177,13 +163,8 @@
   padding: 4px;
   border-radius: 50%;
 }
-.btn-close:hover {
-  background: #334155;
-  color: white;
-}
-.btn-close .material-symbols-outlined {
-  font-size: 20px;
-}
+.btn-close:hover { background: #334155; color: white; }
+.btn-close .material-symbols-outlined { font-size: 20px; }
 
 .participants-list {
   flex: 1;
@@ -191,84 +172,66 @@
   padding: 8px;
 }
 
+/* TRUCO FLEXBOX: Acomoda botones a la derecha */
 .participant-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 10px;
   border-radius: 8px;
   transition: background 0.2s;
 }
+.participant-item:hover { background: #334155; }
 
-.participant-item:hover {
-  background: #334155;
-}
-
-.participant-avatar .material-symbols-outlined {
-  font-size: 32px;
-  color: #94a3b8;
-}
+.participant-avatar .material-symbols-outlined { font-size: 32px; color: #94a3b8; }
 
 .participant-info {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0; /* Evita que nombres largos rompan el contenedor */
 }
 
 .participant-name {
   font-size: 0.9rem;
   font-weight: 500;
   color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.participant-role {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  font-weight: 500;
-}
+.participant-role { font-size: 0.7rem; text-transform: uppercase; font-weight: 500; }
+.participant-role.host { color: #c084fc; }
+.participant-role.presenter { color: #60a5fa; }
+.participant-role.viewer { color: #94a3b8; }
 
-.participant-role.host {
-  color: #c084fc;
-}
-
-.participant-role.presenter {
-  color: #60a5fa;
-}
-
-.participant-role.viewer {
-  color: #94a3b8;
-}
-
-.participant-status .material-symbols-outlined {
-  font-size: 18px;
-  color: #64748b;
-}
-
-.empty-list {
-  text-align: center;
-  color: #64748b;
-  padding: 24px;
-  font-size: 0.85rem;
-}
-
-.empty-list.connecting {
+.participant-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.participant-actions button {
+  background: transparent;
+  border: none;
   color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.participant-actions button:hover { background: #475569; color: white; }
+.participant-actions .material-symbols-outlined { font-size: 18px; }
 
-.spin {
-  animation: spin-anim 1s linear infinite;
-  font-size: 22px !important;
-  color: #7c3aed;
-}
+.empty-list { text-align: center; color: #64748b; padding: 24px; font-size: 0.85rem; }
+.empty-list.connecting { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #94a3b8; }
 
-@keyframes spin-anim {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+.spin { animation: spin-anim 1s linear infinite; font-size: 22px !important; color: #7c3aed; }
+@keyframes spin-anim { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* ========== MAIN SCREEN ========== */
 .main-screen {
@@ -277,6 +240,7 @@
   flex-direction: column;
   background: #0f172a;
   overflow: hidden;
+  min-width: 0;
 }
 
 .stage-wrapper {
@@ -285,6 +249,7 @@
   padding: 16px;
 }
 
+/* ========== BARRA DE CONTROLES ========== */
 .controls-bar {
   flex-shrink: 0;
   padding: 16px 24px;
@@ -317,34 +282,14 @@
   justify-content: center;
   transition: all 0.2s;
 }
-.btn-control:hover {
-  background: #475569;
-}
-.btn-control.danger {
-  background: #e11d48;
-}
-.btn-control.danger:hover {
-  background: #be123c;
-}
-.btn-control.active {
-  background: #3b82f6;
-}
-.btn-control.active:hover {
-  background: #2563eb;
-}
-.btn-control.leave {
-  background: #e11d48;
-  width: auto;
-  border-radius: 48px;
-  padding: 0 20px;
-  gap: 8px;
-}
-.btn-control.leave span {
-  font-size: 24px;
-}
-.material-symbols-outlined {
-  font-size: 24px;
-}
+.btn-control:hover { background: #475569; }
+.btn-control.danger { background: #e11d48; }
+.btn-control.danger:hover { background: #be123c; }
+.btn-control.active { background: #3b82f6; }
+.btn-control.active:hover { background: #2563eb; }
+.btn-control.leave { background: #e11d48; width: auto; border-radius: 48px; padding: 0 20px; gap: 8px; }
+.btn-control.leave span { font-size: 24px; }
+.material-symbols-outlined { font-size: 24px; }
 
 /* ========== SIDEBAR DEL CHAT ========== */
 .sidebar-panel {
@@ -362,11 +307,9 @@
   display: flex;
   flex-direction: column;
 }
-.crown {
-  font-size: 0.85rem;
-  margin-left: 4px;
-  filter: drop-shadow(0 0 2px gold);
-}
+.crown { font-size: 0.85rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
+
+/* ========== CUADRÍCULA DE CÁMARAS (LIVEKIT) ========== */
 .livekit-videos {
   flex: 1;
   display: flex;
@@ -381,31 +324,34 @@
   flex-wrap: wrap;
   gap: 16px;
   justify-content: center;
-  align-items: center;
+  align-content: center;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
-.local-video-wrapper {
+.remote-videos-wrapper {
+  display: contents; /* Desaparece el div intermedio, une los videos remotos al flujo flexbox */
+}
+
+/* Regla universal para TODAS las cámaras */
+.local-video-wrapper,
+.remote-videos-wrapper video {
   position: relative;
   background: #111827;
   border-radius: 12px;
-  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  aspect-ratio: 16/9;
-  flex: 1 1 300px;
-  max-width: 800px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   border: 1px solid #334155;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  flex: 1 1 300px; 
+  max-width: 450px; 
 }
 
 .local-video-wrapper video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #000;
+  border-radius: 12px;
 }
 
 .video-placeholder {
@@ -418,12 +364,9 @@
   background: #1e293b;
   color: #94a3b8;
   z-index: 2;
+  border-radius: 12px;
 }
-
-.video-placeholder .material-symbols-outlined {
-  font-size: 48px;
-  margin-bottom: 8px;
-}
+.video-placeholder .material-symbols-outlined { font-size: 48px; margin-bottom: 8px; }
 
 .video-label {
   position: absolute;
@@ -439,26 +382,6 @@
   backdrop-filter: blur(4px);
 }
 
-.remote-videos-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.remote-videos-wrapper video {
-  flex: 1 1 300px;
-  max-width: 800px;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  background: #111827;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  border: 1px solid #334155;
-}
-
 /* ========== RESPONSIVIDAD (MÓVIL) ========== */
 @media (max-width: 768px) {
   .main-layout {
@@ -466,6 +389,7 @@
     height: auto;
     min-height: calc(100vh - 64px);
     overflow-y: auto;
+    padding-bottom: 80px; /* Evita que la barra de controles fija tape contenido */
   }
 
   .participants-panel {
@@ -488,9 +412,7 @@
     min-height: 400px;
   }
 
-  .room-header {
-    padding: 0 12px;
-  }
+  .room-header { padding: 0 12px; }
 
   .room-info h2 {
     font-size: 1rem;
@@ -500,8 +422,15 @@
     max-width: 120px;
   }
   
+  /* Fijar la barra de controles en el fondo */
   .controls-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
     padding: 12px;
+    box-sizing: border-box;
   }
   
   .control-buttons {
