@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-oauth-callback',
   standalone: true,
+  imports: [],
   template: `
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #0f172a; color: white; font-family: sans-serif;">
       <h2 style="margin-bottom: 1rem;">Verificando credenciales...</h2>
@@ -17,18 +18,27 @@ import { AuthService } from '../../../core/services/auth';
 })
 export class OauthCallback implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
 
   ngOnInit(): void {
-    this.authService.checkSession().subscribe({
-      next: () => {
-        // Redirección directa al dashboard del Host
-        this.router.navigate(['/dashboard']);
-      },
-      error: () => {
-        // Si el token falló o la cookie expiró, vuelve al login
-        this.router.navigate(['/auth/login']);
-      }
-    });
+    // El API redirige con ?token=<jwt> para evitar el bloqueo de cookies cross-site
+    const token = this.route.snapshot.queryParamMap.get('token');
+
+    if (token) {
+      // Guardar en localStorage → el interceptor lo mandará como Bearer en cada petición
+      this.authService.saveToken(token);
+      // Cargar el perfil del usuario en memoria y navegar
+      this.authService.checkSession().subscribe({
+        next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+        error: () => this.router.navigate(['/auth/login'], { replaceUrl: true })
+      });
+    } else {
+      // Fallback: si no hay token en URL, verificar si ya hay sesión activa
+      this.authService.checkSession().subscribe({
+        next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+        error: () => this.router.navigate(['/auth/login'], { replaceUrl: true })
+      });
+    }
   }
 }
