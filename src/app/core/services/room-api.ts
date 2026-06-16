@@ -2,13 +2,14 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { PublicRoom, RoomHistory, RoomJoinResponse } from '../../shared/interfaces/shared.interfaces';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoomApiService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:3000/api/rooms';
+  private readonly API_URL = `${environment.apiUrl}/rooms`;
 
   public publicRooms = signal<PublicRoom[]>([]);
   public roomHistory = signal<RoomHistory[]>([]);
