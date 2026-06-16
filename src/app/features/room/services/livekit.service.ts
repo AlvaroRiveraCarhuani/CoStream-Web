@@ -19,6 +19,16 @@ export class LivekitService {
       return;
     }
 
+    // PASO 1: Pedir permiso al navegador ANTES de conectar.
+    // Esto fuerza el diálogo "Permitir cámara/micrófono" en el navegador.
+    // Si el usuario niega, continuamos sin media (solo lectura de sala).
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Liberar inmediatamente; LiveKit tomará el control
+    } catch (permErr) {
+      console.warn('No se obtuvo permiso de media. Se continúa sin cámara/micrófono:', permErr);
+    }
+
     this.room = new Room({
       publishDefaults: { stopMicTrackOnMute: false }
     });
@@ -58,19 +68,26 @@ export class LivekitService {
       videos.forEach(v => v.remove());
     });
 
+    // PASO 2: Conectar a LiveKit. Este paso NO debe fallar por errores de media.
+    await this.room.connect(this.livekitUrl, token);
+    console.log('Conectado a LiveKit');
+
+    // PASO 3: Habilitar media LOCAL. Si falla (sin dispositivo o sin permiso),
+    // solo se registra una advertencia — la conexión a la sala se mantiene.
     try {
-      await this.room.connect(this.livekitUrl, token);
-      console.log('Conectado a LiveKit');
-      // Asegurar que los tracks se publican
       if (!this.room.localParticipant.isMicrophoneEnabled) {
         await this.room.localParticipant.setMicrophoneEnabled(true);
       }
+    } catch (micErr) {
+      console.warn('No se pudo habilitar el micrófono:', micErr);
+    }
+
+    try {
       if (!this.room.localParticipant.isCameraEnabled) {
         await this.room.localParticipant.setCameraEnabled(true);
       }
-    } catch (err) {
-      console.error('Error conectando a LiveKit', err);
-      throw err;
+    } catch (camErr) {
+      console.warn('No se pudo habilitar la cámara:', camErr);
     }
   }
 
