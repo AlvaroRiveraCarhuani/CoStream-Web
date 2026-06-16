@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Room, RoomEvent, Track, RemoteTrack, RemoteParticipant, LocalTrackPublication } from 'livekit-client';
 import { environment } from '../../../../environments/environment'
+
 @Injectable({ providedIn: 'root' })
 export class LivekitService {
   private room: Room | null = null;
@@ -20,8 +21,6 @@ export class LivekitService {
     }
 
     // PASO 1: Pedir permiso al navegador ANTES de conectar.
-    // Esto fuerza el diálogo "Permitir cámara/micrófono" en el navegador.
-    // Si el usuario niega, continuamos sin media (solo lectura de sala).
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       stream.getTracks().forEach(track => track.stop()); // Liberar inmediatamente; LiveKit tomará el control
@@ -43,6 +42,7 @@ export class LivekitService {
       }
     });
 
+    //  CORRECCIÓN: Manejar tanto Video como Audio al suscribirse
     this.room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const videoEl = document.createElement('video');
@@ -53,27 +53,43 @@ export class LivekitService {
         videoEl.setAttribute('data-participant-id', participant.identity);
         track.attach(videoEl);
         this.remoteVideoContainer!.appendChild(videoEl);
+      } 
+      else if (track.kind === Track.Kind.Audio) {
+        const audioEl = document.createElement('audio');
+        audioEl.autoplay = true;
+        // Asignamos un ID especial para identificar el audio de este participante
+        audioEl.setAttribute('data-participant-audio-id', participant.identity);
+        track.attach(audioEl);
+        this.remoteVideoContainer!.appendChild(audioEl);
       }
     });
 
+    //  CORRECCIÓN: Limpiar tanto el Video como el Audio al desuscribirse
     this.room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const el = this.remoteVideoContainer!.querySelector(`[data-participant-id="${participant.identity}"]`);
         if (el) el.remove();
+      } 
+      else if (track.kind === Track.Kind.Audio) {
+        const audioEl = this.remoteVideoContainer!.querySelector(`[data-participant-audio-id="${participant.identity}"]`);
+        if (audioEl) audioEl.remove();
       }
     });
 
+    //  CORRECCIÓN: Asegurarnos de limpiar ambos si el participante se desconecta por completo
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
       const videos = this.remoteVideoContainer!.querySelectorAll(`[data-participant-id="${participant.identity}"]`);
       videos.forEach(v => v.remove());
+      
+      const audios = this.remoteVideoContainer!.querySelectorAll(`[data-participant-audio-id="${participant.identity}"]`);
+      audios.forEach(a => a.remove());
     });
 
     // PASO 2: Conectar a LiveKit. Este paso NO debe fallar por errores de media.
     await this.room.connect(this.livekitUrl, token);
     console.log('Conectado a LiveKit');
 
-    // PASO 3: Habilitar media LOCAL. Si falla (sin dispositivo o sin permiso),
-    // solo se registra una advertencia — la conexión a la sala se mantiene.
+    // PASO 3: Habilitar media LOCAL.
     try {
       if (!this.room.localParticipant.isMicrophoneEnabled) {
         await this.room.localParticipant.setMicrophoneEnabled(true);
