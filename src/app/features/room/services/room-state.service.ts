@@ -29,10 +29,13 @@ export class RoomStateService {
   }
 
   connect(roomId: string) {
+    const token = localStorage.getItem('costream_token');
+
     this.socket = io(environment.socketUrl, {
       withCredentials: true,
       transports: ['websocket'],
-      upgrade: false
+      upgrade: false,
+      auth: { token } // JWT para autenticación cross-origin en el handshake
     });
 
     this.socket.on('connect', async () => {
