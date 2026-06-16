@@ -34,6 +34,7 @@ export class Room implements OnInit, OnDestroy {
   isScreenSharing = false;
   dropdownOpen = false;
   showParticipants = true;
+  socketConnected = false;
 
   get currentUserId(): string {
     const user = this.authService.currentUser();
@@ -61,8 +62,23 @@ export class Room implements OnInit, OnDestroy {
             return;
           }
 
-          this.roomState.connect(this.roomId);
           this.isHost = (roomData.creatorId === this.currentUserId);
+
+          // Agregar al usuario local de forma optimista antes de que llegue el WebSocket
+          const currentUser = this.authService.currentUser();
+          if (currentUser) {
+            this.roomState.participants.set([{
+              userId: currentUser.sub || currentUser.id,
+              name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Tú',
+              role: this.isHost ? 'HOST' : 'PRESENTER',
+              isOnStage: this.isHost,
+            }]);
+          }
+
+          this.roomState.connect(this.roomId, () => {
+            this.socketConnected = true;
+            this.cdr.detectChanges();
+          });
           this.cdr.detectChanges();
 
           const token = localStorage.getItem('livekit_token');

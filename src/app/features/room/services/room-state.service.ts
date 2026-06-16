@@ -28,7 +28,7 @@ export class RoomStateService {
     }
   }
 
-  connect(roomId: string) {
+  connect(roomId: string, onConnected?: () => void) {
     const token = localStorage.getItem('costream_token');
 
     this.socket = io(environment.socketUrl, {
@@ -39,6 +39,7 @@ export class RoomStateService {
     });
 
     this.socket.on('connect', async () => {
+      onConnected?.();
       this.socket.emit('room:join', { roomId });
       await this.loadMessageHistory(roomId);
     });

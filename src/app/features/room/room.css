@@ -251,6 +251,25 @@
   font-size: 0.85rem;
 }
 
+.empty-list.connecting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.spin {
+  animation: spin-anim 1s linear infinite;
+  font-size: 22px !important;
+  color: #7c3aed;
+}
+
+@keyframes spin-anim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ========== MAIN SCREEN ========== */
 .main-screen {
   flex: 3;

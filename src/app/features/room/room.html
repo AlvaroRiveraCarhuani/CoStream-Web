@@ -62,7 +62,15 @@
           </div>
         </ng-container>
         <ng-template #emptyList>
-          <div class="empty-list">No hay otros participantes</div>
+          <div class="empty-list" *ngIf="socketConnected; else connecting">
+            Solo tú estás aquí
+          </div>
+          <ng-template #connecting>
+            <div class="empty-list connecting">
+              <span class="material-symbols-outlined spin">sync</span>
+              Conectando...
+            </div>
+          </ng-template>
         </ng-template>
       </div>
     </aside>
