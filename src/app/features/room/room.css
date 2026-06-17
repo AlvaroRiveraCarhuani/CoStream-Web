@@ -124,6 +124,7 @@
   gap: 0;
   height: calc(100vh - 64px);
   overflow: hidden; /* VITAL: Aísla las 3 columnas para que no se desborden */
+  position: relative;
 }
 
 /* ========== PANEL DE PARTICIPANTES ========== */
@@ -133,15 +134,16 @@
   border-right: 1px solid #334155;
   display: flex;
   flex-direction: column;
-  transition: width 0.2s ease, opacity 0.2s, visibility 0.2s;
+  transition: width 0.3s ease, opacity 0.3s, transform 0.3s;
   overflow: hidden;
   flex-shrink: 0;
+  z-index: 40;
 }
 
 .participants-panel.collapsed {
   width: 0;
   opacity: 0;
-  visibility: hidden;
+  border: none;
 }
 
 .panel-header {
@@ -152,6 +154,10 @@
   border-bottom: 1px solid #334155;
 }
 .panel-header h3 { margin: 0; font-size: 1rem; font-weight: 500; color: #cbd5e1; }
+
+.mobile-only {
+  display: none;
+}
 
 .btn-close {
   background: transparent;
@@ -172,7 +178,6 @@
   padding: 8px;
 }
 
-/* TRUCO FLEXBOX: Acomoda botones a la derecha */
 .participant-item {
   display: flex;
   align-items: center;
@@ -235,81 +240,15 @@
 
 /* ========== MAIN SCREEN ========== */
 .main-screen {
-  flex: 3;
+  flex: 1;
   display: flex;
   flex-direction: column;
   background: #0f172a;
   overflow: hidden;
   min-width: 0;
+  position: relative;
 }
 
-.stage-wrapper {
-  flex: 1;
-  min-height: 0;
-  padding: 16px;
-}
-
-/* ========== BARRA DE CONTROLES ========== */
-.controls-bar {
-  flex-shrink: 0;
-  padding: 16px 24px;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid #1e293b;
-  display: flex;
-  justify-content: center;
-}
-
-.control-buttons {
-  display: flex;
-  gap: 12px;
-  background: #1e293b;
-  padding: 8px 16px;
-  border-radius: 48px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.btn-control {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #334155;
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.btn-control:hover { background: #475569; }
-.btn-control.danger { background: #e11d48; }
-.btn-control.danger:hover { background: #be123c; }
-.btn-control.active { background: #3b82f6; }
-.btn-control.active:hover { background: #2563eb; }
-.btn-control.leave { background: #e11d48; width: auto; border-radius: 48px; padding: 0 20px; gap: 8px; }
-.btn-control.leave span { font-size: 24px; }
-.material-symbols-outlined { font-size: 24px; }
-
-/* ========== SIDEBAR DEL CHAT ========== */
-.sidebar-panel {
-  flex: 1;
-  max-width: 320px;
-  background: #111827;
-  border-left: 1px solid #1e293b;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.chat-component {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.crown { font-size: 0.85rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
-
-/* ========== CUADRÍCULA DE CÁMARAS (LIVEKIT) ========== */
 .livekit-videos {
   flex: 1;
   display: flex;
@@ -317,6 +256,7 @@
   background: #000;
   padding: 16px;
   overflow-y: auto;
+  position: relative;
 }
 
 .video-container {
@@ -382,59 +322,208 @@
   backdrop-filter: blur(4px);
 }
 
+/* ========== BARRA DE CONTROLES ZOOM STYLE ========== */
+.controls-bar {
+  flex-shrink: 0;
+  padding: 12px 24px;
+  background: #111827;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  justify-content: center;
+  z-index: 50;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.btn-control {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  min-width: 72px;
+}
+
+.btn-control:hover { background: #1f2937; color: white; }
+.btn-control.danger { color: #ef4444; }
+.btn-control.danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.btn-control.active { color: #10b981; }
+
+.btn-control .material-symbols-outlined { font-size: 24px; margin-bottom: 4px; }
+.btn-control .btn-label { font-size: 0.75rem; font-weight: 500; white-space: nowrap; }
+
+.btn-control.leave {
+  background: #ef4444;
+  color: white;
+  margin-left: 16px;
+  padding: 8px 24px;
+}
+.btn-control.leave:hover { background: #dc2626; color: white; }
+
+/* ========== SIDEBAR DEL CHAT ========== */
+.sidebar-panel {
+  width: 320px;
+  background: #111827;
+  border-left: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease, opacity 0.3s, transform 0.3s;
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 40;
+}
+
+.sidebar-panel.collapsed {
+  width: 0;
+  opacity: 0;
+  border: none;
+}
+
+.chat-component {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.crown { font-size: 0.85rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
+
+/* ========== MODALS Y TOASTS ========== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal {
+  background: #1e293b; border-radius: 16px; padding: 24px; width: 90%; max-width: 400px;
+  text-align: center; border: 1px solid #334155;
+}
+.modal h3 { margin-top: 0; color: white; font-weight: 600; margin-bottom: 8px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.btn-text { background: transparent; color: #94a3b8; border: none; font-weight: 500; cursor: pointer; padding: 8px 16px; }
+.btn-text:hover { color: white; }
+.btn-danger-solid { background: #ef4444; color: white; border: none; font-weight: 500; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+.btn-danger-solid:hover { background: #dc2626; }
+
+.toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; }
+.toast {
+  background: #1e293b; color: white; padding: 12px 24px; border-radius: 8px;
+  display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #334155;
+}
+
 /* ========== RESPONSIVIDAD (MÓVIL) ========== */
 @media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-    height: auto;
-    min-height: calc(100vh - 64px);
-    overflow-y: auto;
-    padding-bottom: 80px; /* Evita que la barra de controles fija tape contenido */
+  /* En móvil, los sidebars flotan sobre el contenido para no aplastarlo */
+  
+  .mobile-only {
+    display: flex;
   }
 
-  .participants-panel {
-    width: 100%;
-    max-height: 300px;
-    border-right: none;
-    border-bottom: 1px solid #334155;
+  .room-header { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    z-index: 30;
+    background: rgba(15, 23, 42, 0.7);
+    border-bottom: none;
   }
-
-  .sidebar-panel {
-    max-width: 100%;
-    height: 400px;
-    border-left: none;
-    border-top: 1px solid #1e293b;
-  }
-
-  .main-screen {
-    flex: none;
-    height: auto;
-    min-height: 400px;
-  }
-
-  .room-header { padding: 0 12px; }
 
   .room-info h2 {
     font-size: 1rem;
+    max-width: 120px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
+  }
+
+  .main-layout {
+    height: 100vh; /* Ocupa todo el espacio de pantalla disponible */
+  }
+
+  .main-screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    /* Dejar espacio para la barra de abajo y el header de arriba */
+    padding-top: 64px; 
+    padding-bottom: 80px; 
+    box-sizing: border-box;
+  }
+
+  .livekit-videos {
+    padding: 0;
   }
   
-  /* Fijar la barra de controles en el fondo */
+  .video-container {
+    gap: 4px;
+    align-content: stretch;
+  }
+  
+  .local-video-wrapper,
+  .remote-videos-wrapper video {
+    border-radius: 0;
+    border: none;
+    max-width: 100%; 
+  }
+
   .controls-bar {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 100;
-    padding: 12px;
-    box-sizing: border-box;
+    padding: 8px;
+    justify-content: space-evenly;
+    background: rgba(15, 23, 42, 0.95);
   }
-  
+
   .control-buttons {
-    flex-wrap: wrap;
-    justify-content: center;
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .btn-control {
+    min-width: 0;
+    flex: 1;
+    padding: 6px 4px;
+  }
+
+  .btn-control.leave {
+    margin-left: 0;
+    padding: 6px 12px;
+  }
+
+  /* Paneles flotantes (Drawers) */
+  .participants-panel,
+  .sidebar-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    background: #0f172a;
+    border: none;
+    transform: translateX(0);
+  }
+
+  .participants-panel.collapsed,
+  .sidebar-panel.collapsed {
+    transform: translateX(100%); /* Lo esconde hacia la derecha */
+    width: 100%;
+    opacity: 1; /* No usamos opacity para el efecto slide */
   }
 }

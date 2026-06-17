@@ -33,7 +33,8 @@ export class Room implements OnInit, OnDestroy {
   isCameraOff = localStorage.getItem('initial_cam') !== 'true';
   isScreenSharing = false;
   dropdownOpen = false;
-  showParticipants = true;
+  showParticipants = false; // Por defecto cerrado en móvil
+  showChat = false;
   socketConnected = false;
 
   showLeaveModal = false;
@@ -116,6 +117,12 @@ export class Room implements OnInit, OnDestroy {
 
   toggleParticipantsPanel() {
     this.showParticipants = !this.showParticipants;
+    if (this.showParticipants) this.showChat = false; // Solo uno a la vez en móvil
+  }
+
+  toggleChat() {
+    this.showChat = !this.showChat;
+    if (this.showChat) this.showParticipants = false; // Solo uno a la vez en móvil
   }
 
   async toggleMute() {

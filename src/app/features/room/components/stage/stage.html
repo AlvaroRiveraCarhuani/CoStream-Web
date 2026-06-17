@@ -1,35 +1,28 @@
-<div class="stage-container">
-
-    <div class="active-grid">
-        @for (participant of roomState.onStageParticipants(); track participant.userId) {
-        <div class="video-tile">
-            <div class="video-placeholder">
-                <span class="avatar">{{ participant.name.charAt(0) }}</span>
-            </div>
-            <div class="participant-info">
-                <span class="name">{{ participant.name }}</span>
-                <span class="role-badge" [class]="participant.role.toLowerCase()">
-                    {{ participant.role }}
-                </span>
-            </div>
-        </div>
-        } @empty {
-        <div class="empty-stage">
-            <p>El escenario está vacío</p>
-        </div>
-        }
-    </div>
-
+<div class="stage-container" *ngIf="roomState.backstageParticipants().length > 0">
     <div class="backstage-bar">
-        <div class="backstage-header">Backstage</div>
+        <div class="backstage-header">
+            <span>Backstage ({{ roomState.backstageParticipants().length }})</span>
+            <span class="info-text">Los invitados aquí no son visibles en la transmisión</span>
+        </div>
         <div class="backstage-list">
             @for (participant of roomState.backstageParticipants(); track participant.userId) {
             <div class="backstage-tile">
-                <span class="name">{{ participant.name }}</span>
-                <button class="btn-promote" (click)="subirAlEscenario(participant.userId)">Subir</button>
+                <div class="avatar-placeholder">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                <div class="info">
+                    <span class="name">{{ participant.name }}</span>
+                    <span class="status">Esperando...</span>
+                </div>
+                <button class="btn-promote" (click)="subirAlEscenario(participant.userId)">
+                    <span class="material-symbols-outlined">arrow_upward</span> Subir
+                </button>
+            </div>
+            } @empty {
+            <div class="empty-backstage">
+                No hay nadie esperando en el backstage
             </div>
             }
         </div>
     </div>
-
 </div>
