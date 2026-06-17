@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { RoomParticipant, ChatMessage } from '../../../shared/interfaces/shared.interfaces';
 import { LivekitService } from './livekit.service';
 import { environment } from '../../../../environments/environment'
+
 @Injectable({ providedIn: 'root' })
 export class RoomStateService {
   private socket!: Socket;
@@ -35,7 +36,7 @@ export class RoomStateService {
       withCredentials: true,
       transports: ['websocket'],
       upgrade: false,
-      auth: { token } // JWT para autenticación cross-origin en el handshake
+      auth: { token }
     });
 
     this.socket.on('connect', async () => {
@@ -79,13 +80,13 @@ export class RoomStateService {
     });
 
     this.socket.on('room:kicked', () => {
-      const toast = document.createElement('div');
-      toast.className = 'toast-container';
-      toast.innerHTML = `<div class="toast"><span class="material-symbols-outlined" style="color: #ef4444;">error</span><span>El anfitrión ha finalizado la transmisión.</span></div>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-
       this.zone.run(() => {
+        const toast = document.createElement('div');
+        toast.className = 'toast-container';
+        toast.innerHTML = `<div class="toast"><span class="material-symbols-outlined" style="color: #ef4444;">error</span><span>El anfitrión ha finalizado la transmisión.</span></div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+        
         this.disconnect();
         window.location.href = '/dashboard';
       });
@@ -104,10 +105,13 @@ export class RoomStateService {
     });
 
     // ========== LISTENERS DE MODERACIÓN ==========
+    
     // Escucha cuando el anfitrión fuerza el estado del micrófono
     this.socket.on('force_microphone', (data: { enabled: boolean }) => {
       console.log('force_microphone recibido:', data);
       this.zone.run(async () => {
+        // Al llamar a setMicrophoneEnabled, se dispara el callback onMuteStatusChange
+        // que actualiza el botón en room.ts
         await this.livekitService.setMicrophoneEnabled(data.enabled);
       });
     });
@@ -127,7 +131,6 @@ export class RoomStateService {
     }
   }
 
-  // Método para enviar comandos de moderación (los usan los botones del anfitrión)
   sendModCommand(event: string, data: any) {
     if (this.socket) {
       this.socket.emit(event, data);

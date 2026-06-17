@@ -8,6 +8,9 @@ export class LivekitService {
   private localVideoElement: HTMLVideoElement | null = null;
   private remoteVideoContainer: HTMLElement | null = null;
   private livekitUrl = environment.livekitUrl;
+  
+  // Callback para avisar a la UI cuando cambie el mute remotamente
+  public onMuteStatusChange: ((muted: boolean) => void) | null = null;
 
   constructor(private zone: NgZone) {}
 
@@ -33,11 +36,14 @@ export class LivekitService {
 
     this.room.on(RoomEvent.LocalTrackPublished, (publication: LocalTrackPublication) => {
       if (publication.kind === Track.Kind.Video && publication.track) {
-        setTimeout(() => {
-          if (this.localVideoElement) {
-            publication.track?.attach(this.localVideoElement!);
-          }
-        }, 100);
+        // CORRECCIÓN: Solo adjuntar si es la cámara web, NO la pantalla compartida
+        if (publication.source === Track.Source.Camera) {
+          setTimeout(() => {
+            if (this.localVideoElement) {
+              publication.track?.attach(this.localVideoElement!);
+            }
+          }, 100);
+        }
       }
     });
 
@@ -75,38 +81,18 @@ export class LivekitService {
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
       const videos = this.remoteVideoContainer!.querySelectorAll(`[data-participant-id="${participant.identity}"]`);
       videos.forEach(v => v.remove());
-      
       const audios = this.remoteVideoContainer!.querySelectorAll(`[data-participant-audio-id="${participant.identity}"]`);
       audios.forEach(a => a.remove());
     });
 
     await this.room.connect(this.livekitUrl, token);
     console.log('Conectado a LiveKit');
-
-    const wantMicOn = localStorage.getItem('initial_mic') === 'true';
-    const wantCamOn = localStorage.getItem('initial_cam') === 'true';
-
-    try {
-      if (wantMicOn && !this.room.localParticipant.isMicrophoneEnabled) {
-        await this.room.localParticipant.setMicrophoneEnabled(true);
-      }
-    } catch (micErr) {
-      console.warn('No se pudo habilitar el micrófono:', micErr);
-    }
-
-    try {
-      if (wantCamOn && !this.room.localParticipant.isCameraEnabled) {
-        await this.room.localParticipant.setCameraEnabled(true);
-      }
-    } catch (camErr) {
-      console.warn('No se pudo habilitar la cámara:', camErr);
-    }
   }
 
   async toggleMicrophone(): Promise<boolean> {
     if (!this.room) return false;
     const newState = !this.room.localParticipant.isMicrophoneEnabled;
-    await this.room.localParticipant.setMicrophoneEnabled(newState);
+    await this.setMicrophoneEnabled(newState);
     return newState;
   }
 
@@ -117,17 +103,17 @@ export class LivekitService {
     return newState;
   }
 
-  // NUEVO: Función para compartir pantalla
   async toggleScreenShare(): Promise<boolean> {
     if (!this.room) return false;
-    const newState = !this.room.localParticipant.isScreenShareEnabled;
-    await this.room.localParticipant.setScreenShareEnabled(newState);
-    return newState;
+    const isSharing = this.room.localParticipant.isScreenShareEnabled;
+    await this.room.localParticipant.setScreenShareEnabled(!isSharing, { audio: false });
+    return !isSharing;
   }
 
   async setMicrophoneEnabled(enabled: boolean): Promise<void> {
     if (this.room) {
       await this.room.localParticipant.setMicrophoneEnabled(enabled);
+      if (this.onMuteStatusChange) this.onMuteStatusChange(!enabled);
     }
   }
 

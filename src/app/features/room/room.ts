@@ -26,7 +26,6 @@ export class Room implements OnInit, OnDestroy {
   private livekitService = inject(LivekitService);
 
   constructor() {
-    // Sincronizar visibilidad de videos remotos
     effect(() => {
       const onStage = this.roomState.onStageParticipants();
       const onStageIds = new Set(onStage.map(p => p.userId));
@@ -96,7 +95,6 @@ export class Room implements OnInit, OnDestroy {
           }
 
           this.isHost = (roomData.creatorId === this.currentUserId);
-
           const currentUser = this.authService.currentUser();
           const guestName = localStorage.getItem('guest_name');
           
@@ -124,7 +122,14 @@ export class Room implements OnInit, OnDestroy {
               observer.observe(container, { childList: true });
             }
 
+            // CORRECCIÓN: Suscripción al cambio de estado de mute para actualizar el botón en la UI
             this.livekitService.connect(this.roomId, token, 'local-video', 'remote-videos')
+              .then(() => {
+                this.livekitService.onMuteStatusChange = (muted: boolean) => {
+                  this.isMuted = muted;
+                  this.cdr.detectChanges();
+                };
+              })
               .catch(err => console.error('Error conectando a LiveKit:', err));
           }
         },
@@ -133,6 +138,8 @@ export class Room implements OnInit, OnDestroy {
     }
   }
 
+  // ... (El resto de tus métodos: getRoleLabel, trackByUserId, toggleMute, etc., permanecen iguales)
+  
   getRoleLabel(role: string): string {
     switch (role) {
       case 'HOST': return 'Anfitrión';
@@ -167,7 +174,6 @@ export class Room implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // NUEVO: Ahora utiliza LiveKit para compartir la pantalla real
   async toggleScreenShare() {
     const newState = await this.livekitService.toggleScreenShare();
     this.isScreenSharing = newState;
@@ -194,22 +200,15 @@ export class Room implements OnInit, OnDestroy {
     this.showLeaveModal = false;
     this.roomApi.endRoom(this.roomId).subscribe({
       next: () => {
-        // La sala ya está inactiva en la BD
         if (this.roomState['socket']) {
           this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
-          
-          // Desconectar inmediatamente el socket para que el Host NO reciba el 'room:kicked'
-          // que él mismo acaba de emitir (eso causaría un reload de página y cancelaría cosas)
-          setTimeout(() => {
-             this.cleanupAndNavigate();
-          }, 100);
+          setTimeout(() => this.cleanupAndNavigate(), 100);
         } else {
           this.cleanupAndNavigate();
         }
       },
       error: (err) => {
-        console.error('Error finalizando la sala en la BD:', err);
-        // Intentar salir de todos modos
+        console.error('Error finalizando la sala:', err);
         this.cleanupAndNavigate();
       }
     });
@@ -223,35 +222,20 @@ export class Room implements OnInit, OnDestroy {
   displayToast(msg: string) {
     this.toastMessage = msg;
     this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-    }, 2500);
+    setTimeout(() => { this.showToast = false; }, 2500);
   }
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  }
-
-  openSettings() {
-    this.dropdownOpen = false;
-  }
+  toggleDropdown() { this.dropdownOpen = !this.dropdownOpen; }
+  openSettings() { this.dropdownOpen = false; }
 
   muteRemoteParticipant(targetUserId: string, mute: boolean) {
     if (!this.isHost) return;
-    this.roomState.sendModCommand('mod:set_microphone', {
-      roomId: this.roomId,
-      targetUserId,
-      enabled: !mute
-    });
+    this.roomState.sendModCommand('mod:set_microphone', { roomId: this.roomId, targetUserId, enabled: !mute });
   }
 
   setRemoteCamera(targetUserId: string, enabled: boolean) {
     if (!this.isHost) return;
-    this.roomState.sendModCommand('mod:set_camera', {
-      roomId: this.roomId,
-      targetUserId,
-      enabled
-    });
+    this.roomState.sendModCommand('mod:set_camera', { roomId: this.roomId, targetUserId, enabled });
   }
 
   kickParticipant(targetUserId: string) {
@@ -262,10 +246,7 @@ export class Room implements OnInit, OnDestroy {
 
   confirmKick() {
     if (this.participantToKick) {
-      this.roomState.sendModCommand('mod:kick', {
-        roomId: this.roomId,
-        targetUserId: this.participantToKick
-      });
+      this.roomState.sendModCommand('mod:kick', { roomId: this.roomId, targetUserId: this.participantToKick });
       this.participantToKick = null;
     }
     this.showKickModal = false;
@@ -274,9 +255,7 @@ export class Room implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   closeDropdown(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.dropdown')) {
-      this.dropdownOpen = false;
-    }
+    if (!target.closest('.dropdown')) { this.dropdownOpen = false; }
   }
 
   @HostListener('window:beforeunload')
