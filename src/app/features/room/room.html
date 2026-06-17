@@ -76,17 +76,33 @@
     </aside>
 
     <main class="main-screen">
-      <div class="livekit-videos">
-        <div class="video-container">
+      <!-- ══════════════════════════════════════════════════════════
+           VIDEO LAYOUT — Spotlight mode (screen share) + thumbnails
+           ══════════════════════════════════════════════════════════ -->
+      <div class="video-layout" [class.spotlight-mode]="isScreenSharing || hasRemoteScreenShare">
+
+        <!-- ── Área principal: visible sólo cuando alguien comparte pantalla ── -->
+        <div class="spotlight-area" [class.hidden]="!isScreenSharing && !hasRemoteScreenShare">
+          <!-- spotlight-video siempre existe en el DOM para que LiveKit pueda adjuntar el track -->
+          <video id="spotlight-video" autoplay playsinline></video>
+          <div class="spotlight-badge">
+            <span class="material-symbols-outlined">present_to_all</span>
+            <span>{{ screenShareOwnerLabel }}</span>
+          </div>
+        </div>
+
+        <!-- ── Tira de thumbnails: cámaras locales y remotas ── -->
+        <div class="thumbnail-strip">
           <div class="local-video-wrapper">
             <video id="local-video" autoplay muted playsinline></video>
             <div class="video-placeholder" *ngIf="isCameraOff">
               <span class="material-symbols-outlined">videocam_off</span>
             </div>
-            <span class="video-label">Tu cámara</span>
+            <span class="video-label">Tú</span>
           </div>
           <div id="remote-videos" class="remote-videos-wrapper"></div>
         </div>
+
       </div>
       
       <app-stage class="backstage-wrapper" [isHost]="isHost" [roomId]="roomId"></app-stage>

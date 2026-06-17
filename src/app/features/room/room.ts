@@ -35,6 +35,8 @@ export class Room implements OnInit, OnDestroy {
   isMuted = localStorage.getItem('initial_mic') !== 'true';
   isCameraOff = localStorage.getItem('initial_cam') !== 'true';
   isScreenSharing = false;
+  hasRemoteScreenShare = false;
+  screenShareOwnerLabel = '';
   dropdownOpen = false;
   showParticipants = false;
   showChat = false;
@@ -99,15 +101,33 @@ export class Room implements OnInit, OnDestroy {
 
           const token = localStorage.getItem('livekit_token');
           if (token) {
-
-            this.livekitService.connect(this.roomId, token, 'local-video', 'remote-videos')
+            this.livekitService
+              .connect(this.roomId, token, 'local-video', 'remote-videos', 'spotlight-video')
               .then(() => {
                 this.livekitService.onMuteStatusChange = (muted: boolean) => {
                   this.isMuted = muted;
                   this.cdr.detectChanges();
                 };
+
+                // Bug 1 + Bug 3 — Spotlight screen share
+                this.livekitService.onScreenShareChange = (
+                  isSharing: boolean,
+                  isLocal: boolean,
+                  ownerName?: string
+                ) => {
+                  if (isLocal) {
+                    this.isScreenSharing = isSharing;
+                    this.screenShareOwnerLabel = isSharing ? 'Tú estás compartiendo pantalla' : '';
+                  } else {
+                    this.hasRemoteScreenShare = isSharing;
+                    this.screenShareOwnerLabel = isSharing
+                      ? `${ownerName || 'Un participante'} está compartiendo pantalla`
+                      : '';
+                  }
+                  this.cdr.detectChanges();
+                };
               })
-              .catch(err => console.error('Error conectando a LiveKit:', err));
+              .catch((err) => console.error('Error conectando a LiveKit:', err));
           }
         },
         error: () => this.router.navigate(['/dashboard'])
@@ -152,8 +172,12 @@ export class Room implements OnInit, OnDestroy {
   }
 
   async toggleScreenShare() {
-    const newState = await this.livekitService.toggleScreenShare();
-    this.isScreenSharing = newState;
+    try {
+      // isScreenSharing y screenShareOwnerLabel se actualizan via onScreenShareChange callback
+      await this.livekitService.toggleScreenShare();
+    } catch (err) {
+      console.error('Error al compartir pantalla:', err);
+    }
     this.cdr.detectChanges();
   }
 

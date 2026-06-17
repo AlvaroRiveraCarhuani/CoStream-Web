@@ -250,42 +250,130 @@
   min-height: 0; /* Candado flexbox */
 }
 
-/* ========== GRID DE CÁMARAS (LIVEKIT) ========== */
-.livekit-videos {
+/* ========== VIDEO LAYOUT — Sistema dual: Grid normal + Spotlight ========== */
+.video-layout {
   flex: 1;
   display: flex;
   background: #000;
-  padding: 12px;
-  overflow: hidden; /* Sin scroll — los videos se ajustan al espacio */
+  overflow: hidden;
   min-height: 0; /* Candado flexbox */
+  padding: 12px;
+  gap: 8px;
+  /* Modo por defecto: la tira de thumbnails ocupa todo el espacio */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.video-container {
+/* ── Cuando hay pantalla compartida: layout lateral — spotlight izquierda, strip derecha ── */
+.video-layout.spotlight-mode {
+  flex-direction: row;
+  align-items: stretch;
+  padding: 8px;
+}
+
+/* ── Área de spotlight (pantalla compartida) ── */
+.spotlight-area {
+  flex: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  align-content: center;
+  flex-direction: column;
+  position: relative;
+  background: #050d1a;
+  border-radius: 12px;
+  border: 1px solid #3b4a6b;
+  overflow: hidden;
+  min-height: 0;
+  animation: spotlight-enter 0.3s ease;
+}
+
+.spotlight-area.hidden {
+  display: none;
+}
+
+@keyframes spotlight-enter {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.spotlight-area video {
   width: 100%;
   height: 100%;
+  object-fit: contain; /* contain para que se vea la pantalla completa sin recortes */
+  display: block;
 }
 
-.remote-videos-wrapper {
-  display: contents;
+.spotlight-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(139, 92, 246, 0.85);
+  backdrop-filter: blur(6px);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  animation: badge-fade-in 0.4s ease;
+}
+.spotlight-badge .material-symbols-outlined { font-size: 16px; }
+
+@keyframes badge-fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.local-video-wrapper,
-.remote-videos-wrapper video {
+/* ── Tira de thumbnails: cámaras locales + remotas ── */
+.thumbnail-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/* En modo grid normal: la tira es horizontal y ocupa todo el espacio */
+.video-layout:not(.spotlight-mode) .thumbnail-strip {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  flex: 1;
+  overflow: visible;
+}
+
+/* En modo spotlight: la tira es vertical a la derecha, ancho fijo */
+.video-layout.spotlight-mode .thumbnail-strip {
+  width: 192px;
+  flex-shrink: 0;
+}
+
+/* ── Wrapper del video local ── */
+.local-video-wrapper {
   position: relative;
   background: #111827;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   border: 1px solid #334155;
-  aspect-ratio: 16/9;
-  object-fit: cover;
+  overflow: hidden;
+}
+
+/* En modo grid normal: crece libre */
+.video-layout:not(.spotlight-mode) .local-video-wrapper {
   flex: 1 1 280px;
   max-width: 500px;
-  max-height: 100%; /* CLAVE: nunca más alto que el contenedor */
+  aspect-ratio: 16/9;
+}
+
+/* En modo spotlight: thumbnail fijo */
+.video-layout.spotlight-mode .local-video-wrapper {
+  width: 176px;
+  aspect-ratio: 16/9;
+  flex-shrink: 0;
 }
 
 .local-video-wrapper video {
@@ -293,6 +381,46 @@
   height: 100%;
   object-fit: cover;
   border-radius: 12px;
+  display: block;
+}
+
+/* ── Videos remotos (cámaras) — generados dinámicamente por LiveKit ── */
+.remote-videos-wrapper {
+  display: contents;
+}
+
+/* En modo spotlight: los videos remotos dejan de ser "contents" para apilarse */
+.video-layout.spotlight-mode .remote-videos-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.remote-thumbnail,
+.remote-videos-wrapper video {
+  background: #111827;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  border: 1px solid #334155;
+  object-fit: cover;
+  display: block;
+}
+
+/* En modo grid: el video remoto crece libre */
+.video-layout:not(.spotlight-mode) .remote-thumbnail,
+.video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
+  flex: 1 1 280px;
+  max-width: 500px;
+  aspect-ratio: 16/9;
+  max-height: 100%;
+}
+
+/* En modo spotlight: thumbnail fijo */
+.video-layout.spotlight-mode .remote-thumbnail,
+.video-layout.spotlight-mode .remote-videos-wrapper video {
+  width: 176px;
+  aspect-ratio: 16/9;
+  flex-shrink: 0;
 }
 
 .video-placeholder {
@@ -311,12 +439,12 @@
 
 .video-label {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 8px;
+  left: 8px;
   background: rgba(0, 0, 0, 0.6);
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 0.75rem;
   font-weight: 500;
   color: white;
   z-index: 3;
@@ -469,21 +597,46 @@
     min-height: 0;
   }
 
-  .livekit-videos {
+  .video-layout {
     padding: 4px;
-  }
-
-  .video-container {
     gap: 4px;
   }
 
-  .local-video-wrapper,
-  .remote-videos-wrapper video {
+  /* En móvil sin spotlight: grid de 2 columnas */
+  .video-layout:not(.spotlight-mode) .local-video-wrapper,
+  .video-layout:not(.spotlight-mode) .remote-thumbnail,
+  .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
     border-radius: 4px;
     border: none;
     box-shadow: none;
     max-width: 100%;
-    flex: 1 1 45%; /* 2 videos por fila en móvil */
+    flex: 1 1 45%;
+  }
+
+  /* En móvil con spotlight: layout vertical (spotlight arriba, strip abajo) */
+  .video-layout.spotlight-mode {
+    flex-direction: column;
+  }
+
+  .video-layout.spotlight-mode .thumbnail-strip {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100px;
+    flex-shrink: 0;
+  }
+
+  .video-layout.spotlight-mode .local-video-wrapper,
+  .video-layout.spotlight-mode .remote-thumbnail,
+  .video-layout.spotlight-mode .remote-videos-wrapper video {
+    width: auto;
+    height: 88px;
+    aspect-ratio: 16/9;
+  }
+
+  .video-layout.spotlight-mode .remote-videos-wrapper {
+    flex-direction: row;
   }
 
   /* ---- Barra de controles: FIJA abajo, siempre visible ---- */
