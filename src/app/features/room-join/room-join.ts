@@ -18,7 +18,7 @@ export class RoomJoin implements OnInit {
   private fb = inject(FormBuilder);
   private roomApi = inject(RoomApiService);
   private authService = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef); // Inyección directa para control del DOM
+  private cdr = inject(ChangeDetectorRef); 
 
   roomId = '';
   status: 'loading' | 'ready' | 'not-found' = 'loading';
@@ -37,7 +37,7 @@ export class RoomJoin implements OnInit {
     if (!this.roomId) return;
 
     if (this.user) {
-      this.joinForm.patchValue({ displayName: this.user.displayName });
+      this.joinForm.patchValue({ displayName: this.user.displayName || this.user.email?.split('@')[0] });
       this.joinForm.get('displayName')?.disable();
     }
 
@@ -53,12 +53,10 @@ export class RoomJoin implements OnInit {
           }
           this.status = 'ready';
         }
-        // Forzamos el repintado inmediato de la interfaz
         this.cdr.detectChanges(); 
       },
       error: () => {
         this.status = 'not-found';
-        // Forzamos el repintado incluso si hay un error de red
         this.cdr.detectChanges();
       }
     });
@@ -76,12 +74,17 @@ export class RoomJoin implements OnInit {
       pin: formValue.pin
     }).subscribe({
       next: (res) => {
+        // 1. Guardar el token de LiveKit
         localStorage.setItem('livekit_token', res.guestToken!);
+        
+        // 2. NUEVO: Guardar el nombre del invitado para que la sala lo reconozca
+        localStorage.setItem('guest_name', formValue.displayName);
+        
         this.router.navigate(['/room', this.roomId]);
       },
       error: (err) => {
-         this.errorMessage = err.error?.message || 'Error al ingresar. Verifique el PIN.';
-         this.cdr.detectChanges(); 
+          this.errorMessage = err.error?.message || 'Error al ingresar. Verifique el PIN.';
+          this.cdr.detectChanges(); 
       }
     });
   }

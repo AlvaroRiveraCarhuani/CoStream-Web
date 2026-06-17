@@ -51,9 +51,8 @@ export class Room implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
-    const user = this.authService.currentUser();
-
-    if (this.roomId && user) {
+    
+    if (this.roomId) {
       this.roomApi.getRoomStatus(this.roomId).subscribe({
         next: (roomData) => {
           if (!roomData.exists) {
@@ -64,16 +63,21 @@ export class Room implements OnInit, OnDestroy {
 
           this.isHost = (roomData.creatorId === this.currentUserId);
 
-          // Agregar al usuario local de forma optimista antes de que llegue el WebSocket
+          // NUEVO: Lógica unificada para Anfitriones e Invitados
           const currentUser = this.authService.currentUser();
-          if (currentUser) {
-            this.roomState.participants.set([{
-              userId: currentUser.sub || currentUser.id,
-              name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Tú',
-              role: this.isHost ? 'HOST' : 'PRESENTER',
-              isOnStage: this.isHost,
-            }]);
-          }
+          const guestName = localStorage.getItem('guest_name');
+          
+          // Generamos una ID aleatoria si es un invitado sin cuenta
+          const userId = currentUser ? (currentUser.sub || currentUser.id) : ('guest_' + Math.random().toString(36).substr(2, 9));
+          const finalName = currentUser ? (currentUser.displayName || currentUser.email?.split('@')[0]) : (guestName || 'Invitado');
+
+          // Agregamos al usuario local a la lista (sea Host o Guest)
+          this.roomState.participants.set([{
+            userId: userId,
+            name: finalName,
+            role: this.isHost ? 'HOST' : 'PRESENTER',
+            isOnStage: this.isHost,
+          }]);
 
           this.roomState.connect(this.roomId, () => {
             this.socketConnected = true;
@@ -132,18 +136,22 @@ export class Room implements OnInit, OnDestroy {
         }
         this.roomApi.endRoom(this.roomId).subscribe({
           next: () => {
-            this.roomState.disconnect();
-            this.livekitService.disconnect();
-            this.router.navigate(['/dashboard']);
+            this.cleanupAndNavigate();
           },
           error: () => {}
         });
       }
     } else {
-      this.roomState.disconnect();
-      this.livekitService.disconnect();
-      this.router.navigate(['/dashboard']);
+      this.cleanupAndNavigate();
     }
+  }
+
+  private cleanupAndNavigate() {
+    this.roomState.disconnect();
+    this.livekitService.disconnect();
+    localStorage.removeItem('livekit_token');
+    localStorage.removeItem('guest_name');
+    this.router.navigate(['/dashboard']);
   }
 
   copyRoomLink() {
