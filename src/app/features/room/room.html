@@ -117,7 +117,7 @@
             <span class="material-symbols-outlined">{{ isCameraOff ? 'videocam_off' : 'videocam' }}</span>
             <span class="btn-label">Video</span>
           </button>
-          <button class="btn-control" [class.active]="isScreenSharing" (click)="toggleScreenShare()" title="Compartir pantalla">
+          <button class="btn-control" *ngIf="canScreenShare" [class.active]="isScreenSharing" (click)="toggleScreenShare()" title="Compartir pantalla">
             <span class="material-symbols-outlined">present_to_all</span>
             <span class="btn-label">Compartir</span>
           </button>

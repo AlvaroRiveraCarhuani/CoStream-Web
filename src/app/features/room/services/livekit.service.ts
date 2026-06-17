@@ -33,6 +33,15 @@ export class LivekitService {
 
   constructor(private zone: NgZone) {}
 
+  /**
+   * Detecta si el navegador soporta compartir pantalla.
+   * En iOS (Safari, Chrome, Firefox) getDisplayMedia no existe.
+   * En Android Chrome sí existe desde v72+.
+   */
+  static isScreenShareSupported(): boolean {
+    return !!navigator.mediaDevices?.getDisplayMedia;
+  }
+
   async connect(
     roomName: string,
     token: string,

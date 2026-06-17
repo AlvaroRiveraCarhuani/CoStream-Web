@@ -37,6 +37,7 @@ export class Room implements OnInit, OnDestroy {
   isScreenSharing = false;
   hasRemoteScreenShare = false;
   screenShareOwnerLabel = '';
+  canScreenShare = LivekitService.isScreenShareSupported();
   dropdownOpen = false;
   showParticipants = false;
   showChat = false;
@@ -175,8 +176,10 @@ export class Room implements OnInit, OnDestroy {
     try {
       // isScreenSharing y screenShareOwnerLabel se actualizan via onScreenShareChange callback
       await this.livekitService.toggleScreenShare();
-    } catch (err) {
+    } catch (err: any) {
+      const message = err?.message || 'Error desconocido';
       console.error('Error al compartir pantalla:', err);
+      this.displayToast(`No se pudo compartir pantalla: ${message}`);
     }
     this.cdr.detectChanges();
   }
