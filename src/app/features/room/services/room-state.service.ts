@@ -95,6 +95,14 @@ export class RoomStateService {
       this.zone.run(() => this.messages.update(msgs => [...msgs, message]));
     });
 
+    this.socket.on('room:promoted', (data: { userId: string }) => {
+      this.zone.run(() => {
+        this.participants.update(users => 
+          users.map(u => u.userId === data.userId ? { ...u, isOnStage: true } : u)
+        );
+      });
+    });
+
     // ========== LISTENERS DE MODERACIÓN ==========
     // Escucha cuando el anfitrión fuerza el estado del micrófono
     this.socket.on('force_microphone', (data: { enabled: boolean }) => {

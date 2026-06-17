@@ -1,4 +1,4 @@
-<div class="stage-container" *ngIf="roomState.backstageParticipants().length > 0">
+<div class="stage-container" *ngIf="isHost && roomState.backstageParticipants().length > 0">
     <div class="backstage-bar">
         <div class="backstage-header">
             <span>Backstage ({{ roomState.backstageParticipants().length }})</span>
@@ -14,7 +14,7 @@
                     <span class="name">{{ participant.name }}</span>
                     <span class="status">Esperando...</span>
                 </div>
-                <button class="btn-promote" (click)="subirAlEscenario(participant.userId)">
+                <button class="btn-promote" *ngIf="isHost" (click)="subirAlEscenario(participant.userId)">
                     <span class="material-symbols-outlined">arrow_upward</span> Subir
                 </button>
             </div>

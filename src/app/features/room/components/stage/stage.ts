@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RoomStateService } from '../../services/room-state.service';
 
@@ -10,10 +10,11 @@ import { RoomStateService } from '../../services/room-state.service';
   styleUrls: ['./stage.css']
 })
 export class Stage {
+  @Input() isHost: boolean = false;
   protected roomState = inject(RoomStateService);
 
   promoteToStage(userId: string) {
-    // Aquí lógica para subir al escenario (socket)
+    this.roomState.sendModCommand('room:promote', { userId });
   }
 
   subirAlEscenario(userId: string) {
