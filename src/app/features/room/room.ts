@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener, ChangeDetectorRef, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, HostListener, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,31 +25,8 @@ export class Room implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private livekitService = inject(LivekitService);
 
-  constructor() {
-    effect(() => {
-      const onStage = this.roomState.onStageParticipants();
-      const onStageIds = new Set(onStage.map(p => p.userId));
-      this.updateVideosVisibility(onStageIds);
-    });
-  }
 
-  private updateVideosVisibility(onStageIds?: Set<string>) {
-    if (!onStageIds) {
-      onStageIds = new Set(this.roomState.onStageParticipants().map(p => p.userId));
-    }
-    const remoteContainer = document.getElementById('remote-videos');
-    if (remoteContainer) {
-      const videos = remoteContainer.querySelectorAll('video[data-participant-id]');
-      videos.forEach(v => {
-        const id = v.getAttribute('data-participant-id');
-        if (id && onStageIds!.has(id)) {
-          (v as HTMLElement).style.display = 'block';
-        } else {
-          (v as HTMLElement).style.display = 'none';
-        }
-      });
-    }
-  }
+
 
   roomId = '';
   isHost = false;
@@ -65,6 +42,12 @@ export class Room implements OnInit, OnDestroy {
 
   showLeaveModal = false;
   showKickModal = false;
+  showSettingsModal = false;
+  
+  audioDevices: MediaDeviceInfo[] = [];
+  videoDevices: MediaDeviceInfo[] = [];
+  selectedAudioDevice = '';
+  selectedVideoDevice = '';
   participantToKick: string | null = null;
   showToast = false;
   toastMessage = '';
@@ -116,13 +99,7 @@ export class Room implements OnInit, OnDestroy {
 
           const token = localStorage.getItem('livekit_token');
           if (token) {
-            const container = document.getElementById('remote-videos');
-            if (container) {
-              const observer = new MutationObserver(() => this.updateVideosVisibility());
-              observer.observe(container, { childList: true });
-            }
 
-            // CORRECCIÓN: Suscripción al cambio de estado de mute para actualizar el botón en la UI
             this.livekitService.connect(this.roomId, token, 'local-video', 'remote-videos')
               .then(() => {
                 this.livekitService.onMuteStatusChange = (muted: boolean) => {
@@ -225,8 +202,9 @@ export class Room implements OnInit, OnDestroy {
     setTimeout(() => { this.showToast = false; }, 2500);
   }
 
-  toggleDropdown() { this.dropdownOpen = !this.dropdownOpen; }
-  openSettings() { this.dropdownOpen = false; }
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
 
   muteRemoteParticipant(targetUserId: string, mute: boolean) {
     if (!this.isHost) return;
@@ -250,6 +228,41 @@ export class Room implements OnInit, OnDestroy {
       this.participantToKick = null;
     }
     this.showKickModal = false;
+  }
+
+  // ======= CONFIGURACIÓN DE DISPOSITIVOS =======
+  async openSettings() {
+    this.dropdownOpen = false;
+    this.showSettingsModal = true;
+    
+    try {
+      // Pedimos permiso primero si no lo tenemos, para que enumerateDevices devuelva las labels
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
+      
+      this.audioDevices = await this.livekitService.getLocalDevices('audioinput');
+      this.videoDevices = await this.livekitService.getLocalDevices('videoinput');
+      
+      if (this.audioDevices.length > 0 && !this.selectedAudioDevice) {
+        this.selectedAudioDevice = this.audioDevices[0].deviceId;
+      }
+      if (this.videoDevices.length > 0 && !this.selectedVideoDevice) {
+        this.selectedVideoDevice = this.videoDevices[0].deviceId;
+      }
+    } catch (err) {
+      console.error('Error obteniendo dispositivos', err);
+    }
+  }
+
+  onAudioDeviceChange() {
+    if (this.selectedAudioDevice) {
+      this.livekitService.switchDevice('audioinput', this.selectedAudioDevice).catch(e => console.error(e));
+    }
+  }
+
+  onVideoDeviceChange() {
+    if (this.selectedVideoDevice) {
+      this.livekitService.switchDevice('videoinput', this.selectedVideoDevice).catch(e => console.error(e));
+    }
   }
 
   @HostListener('document:click', ['$event'])

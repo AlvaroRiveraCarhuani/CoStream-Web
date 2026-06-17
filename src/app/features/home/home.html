@@ -122,9 +122,9 @@
           <label>Mostrar nombre como</label>
           <input type="text" formControlName="displayName">
         </div>
-        <div class="form-group">
+        <div class="form-group" *ngIf="roomRequiresPin">
           <label>PIN (si aplica)</label>
-          <input type="text" formControlName="pin" placeholder="Opcional">
+          <input type="text" formControlName="pin" placeholder="Ingresa el PIN de la sala">
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-text" (click)="closeJoinModal()">Cancelar</button>

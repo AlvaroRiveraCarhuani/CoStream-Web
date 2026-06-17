@@ -18,7 +18,7 @@
             <span class="material-symbols-outlined">link</span>
             Copiar enlace
           </button>
-          <button *ngIf="isHost" (click)="openSettings()">
+          <button (click)="openSettings()">
             <span class="material-symbols-outlined">settings</span>
             Configuración
           </button>
@@ -163,4 +163,30 @@
       <span>{{ toastMessage }}</span>
     </div>
   </div>
+  <!-- Modal de Configuración -->
+  <div class="modal-overlay" *ngIf="showSettingsModal">
+    <div class="modal">
+      <h3>Configuración de Dispositivos</h3>
+      <div class="form-group">
+        <label>Micrófono</label>
+        <select [(ngModel)]="selectedAudioDevice" (change)="onAudioDeviceChange()">
+          <option *ngFor="let device of audioDevices; let i = index" [value]="device.deviceId">
+            {{ device.label || 'Micrófono ' + (i + 1) }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label>Cámara</label>
+        <select [(ngModel)]="selectedVideoDevice" (change)="onVideoDeviceChange()">
+          <option *ngFor="let device of videoDevices; let i = index" [value]="device.deviceId">
+            {{ device.label || 'Cámara ' + (i + 1) }}
+          </option>
+        </select>
+      </div>
+      <div class="modal-actions" style="margin-top: 2rem;">
+        <button class="btn-primary" (click)="showSettingsModal = false">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
 </div>

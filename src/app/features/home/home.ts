@@ -24,6 +24,7 @@ export class Home implements OnInit {
   isCreateModalOpen = false;
   isJoinModalOpen = false;
   selectedRoomIdToJoin = '';
+  roomRequiresPin = false;
   
   // Formularios
   createForm = this.fb.group({
@@ -95,6 +96,16 @@ export class Home implements OnInit {
   // --- MÉTODOS DE ACCESO ---
   openJoinModal(roomId: string = '') { 
     this.selectedRoomIdToJoin = roomId;
+    const room = this.roomApi.publicRooms().find(r => r.id === roomId);
+    this.roomRequiresPin = room?.requiresPin ?? false;
+    
+    if (this.roomRequiresPin) {
+      this.joinForm.get('pin')?.setValidators(Validators.required);
+    } else {
+      this.joinForm.get('pin')?.clearValidators();
+    }
+    this.joinForm.get('pin')?.updateValueAndValidity();
+    
     this.isJoinModalOpen = true; 
   }
   
@@ -115,6 +126,7 @@ export class Home implements OnInit {
     }).subscribe({
       next: (res: RoomJoinResponse) => {
         localStorage.setItem('livekit_token', res.guestToken!);
+        localStorage.setItem('guest_name', formValue.displayName!);
         this.router.navigate(['/room', this.selectedRoomIdToJoin]);
       }
     });

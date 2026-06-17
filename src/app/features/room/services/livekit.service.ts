@@ -123,6 +123,16 @@ export class LivekitService {
     }
   }
 
+  async getLocalDevices(kind: MediaDeviceKind): Promise<MediaDeviceInfo[]> {
+    return Room.getLocalDevices(kind);
+  }
+
+  async switchDevice(kind: 'videoinput' | 'audioinput', deviceId: string): Promise<void> {
+    if (this.room) {
+      await this.room.switchActiveDevice(kind, deviceId);
+    }
+  }
+
   disconnect(): void {
     if (this.room) {
       this.room.disconnect();

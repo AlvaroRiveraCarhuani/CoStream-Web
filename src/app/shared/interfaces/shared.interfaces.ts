@@ -39,6 +39,8 @@ export interface PublicRoom {
   title: string;
   hostName: string;
   createdAt: string;
+  requiresPin?: boolean;
+  isPublic?: boolean;
 }
 
 export interface RoomHistory {

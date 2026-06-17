@@ -41,7 +41,8 @@ export class RoomStateService {
 
     this.socket.on('connect', async () => {
       onConnected?.();
-      this.socket.emit('room:join', { roomId });
+      const guestName = localStorage.getItem('guest_name');
+      this.socket.emit('room:join', { roomId, displayName: guestName });
       await this.loadMessageHistory(roomId);
     });
 
