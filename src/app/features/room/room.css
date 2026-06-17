@@ -344,16 +344,38 @@
  * ══════════════════════════════════════════════════════════════
  */
 .video-layout:not(.spotlight-mode) .thumbnail-strip {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   align-content: center;
   gap: 16px;
   flex: 1;
-  overflow: auto;
   padding: 16px;
   height: 100%;
+  width: 100%;
+  overflow: auto;
+  
+  /* Fallback por si hay más de 4 participantes o no se detecta el atributo */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Cuadrículas matemáticas precisas basadas en la cantidad de gente */
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] {
+  grid-template-columns: 1fr;
+}
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="2"] {
+  grid-template-columns: 1fr 1fr;
+}
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="3"],
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="4"] {
+  grid-template-columns: 1fr 1fr;
+}
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="5"],
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="6"],
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="7"],
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="8"],
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="9"] {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 /* En modo spotlight: la tira es vertical a la derecha, ancho fijo */
@@ -372,24 +394,26 @@
   overflow: hidden;
 }
 
-/* En modo grid normal: videos dinámicos y adaptativos */
+/* Comportamientos base para todos los videos en la cuadrícula */
 .video-layout:not(.spotlight-mode) .local-video-wrapper,
 .video-layout:not(.spotlight-mode) .remote-thumbnail,
 .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
-  flex: 1 1 300px;
-  max-width: calc(100% - 16px);
+  width: 100%;
+  height: auto;
   aspect-ratio: 16/9;
-  max-height: calc(50vh - 40px); /* Previene apilamiento gigante vertical */
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   border: 1px solid #334155;
   margin: 0;
+  max-width: 100%;
+  max-height: calc(45vh - 20px); /* Previene que colapsen demasiado alto si la pantalla es estrecha */
 }
 
-/* Si solo hay un video en la pantalla, que ocupe más espacio */
-.video-layout:not(.spotlight-mode) .local-video-wrapper:only-child,
-.video-layout:not(.spotlight-mode) .remote-videos-wrapper:only-child video {
+/* Si solo hay un video, le permitimos ser más grande */
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .local-video-wrapper,
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-thumbnail,
+.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-videos-wrapper video {
   max-width: 800px;
   max-height: calc(80vh - 40px);
 }
