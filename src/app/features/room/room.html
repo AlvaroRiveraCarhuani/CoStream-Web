@@ -42,7 +42,7 @@
               <span class="participant-name">{{ p.name || p.displayName || p.userId }}</span>
               <span class="participant-role" [class]="(p.role || '').toLowerCase()">
                 {{ getRoleLabel(p.role) }}
-                <span *ngIf="p.role === 'HOST'" class="crown">👑</span>
+                <span *ngIf="p.role === 'HOST'" class="material-symbols-outlined crown-icon" title="Anfitrión">verified</span>
               </span>
             </div>
             <div class="participant-actions" *ngIf="isHost && p.userId !== currentUserId">

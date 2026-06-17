@@ -1,7 +1,7 @@
 .landing-container { min-height: 100vh; background-color: #0f172a; color: #f8fafc; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; }
 .landing-navbar { display: flex; justify-content: space-between; padding: 1.5rem 2rem; align-items: center; }
 .brand { font-size: 1.5rem; font-weight: 600; color: #38bdf8; display: flex; align-items: center; }
-.brand-logo { height: 32px; object-fit: contain; }
+.brand-logo { height: 48px; object-fit: contain; border-radius: 8px; padding: 4px; background-color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
 .btn-text { color: #cbd5e1; text-decoration: none; font-weight: 500; transition: color 0.2s; }
 .btn-text:hover { color: #fff; }
 .landing-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem; }

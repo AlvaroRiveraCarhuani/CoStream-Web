@@ -540,7 +540,7 @@
   min-height: 0; /* Candado flexbox */
 }
 
-.crown { font-size: 0.85rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
+.crown-icon { font-size: 1rem; margin-left: 4px; color: #fbbf24; vertical-align: middle; }
 
 /* ========== MODALS Y TOASTS ========== */
 .modal-overlay {
