@@ -20,10 +20,9 @@ export class LivekitService {
       return;
     }
 
-    // PASO 1: Pedir permiso al navegador ANTES de conectar.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      stream.getTracks().forEach(track => track.stop()); // Liberar inmediatamente; LiveKit tomará el control
+      stream.getTracks().forEach(track => track.stop());
     } catch (permErr) {
       console.warn('No se obtuvo permiso de media. Se continúa sin cámara/micrófono:', permErr);
     }
@@ -42,7 +41,6 @@ export class LivekitService {
       }
     });
 
-    // CORRECCIÓN: Manejar tanto Video como Audio al suscribirse
     this.room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const videoEl = document.createElement('video');
@@ -57,14 +55,12 @@ export class LivekitService {
       else if (track.kind === Track.Kind.Audio) {
         const audioEl = document.createElement('audio');
         audioEl.autoplay = true;
-        // Asignamos un ID especial para identificar el audio de este participante
         audioEl.setAttribute('data-participant-audio-id', participant.identity);
         track.attach(audioEl);
         this.remoteVideoContainer!.appendChild(audioEl);
       }
     });
 
-    // CORRECCIÓN: Limpiar tanto el Video como el Audio al desuscribirse
     this.room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const el = this.remoteVideoContainer!.querySelector(`[data-participant-id="${participant.identity}"]`);
@@ -76,7 +72,6 @@ export class LivekitService {
       }
     });
 
-    // CORRECCIÓN: Asegurarnos de limpiar ambos si el participante se desconecta por completo
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
       const videos = this.remoteVideoContainer!.querySelectorAll(`[data-participant-id="${participant.identity}"]`);
       videos.forEach(v => v.remove());
@@ -85,11 +80,9 @@ export class LivekitService {
       audios.forEach(a => a.remove());
     });
 
-    // PASO 2: Conectar a LiveKit. Este paso NO debe fallar por errores de media.
     await this.room.connect(this.livekitUrl, token);
     console.log('Conectado a LiveKit');
 
-    // PASO 3: Habilitar media LOCAL respetando la decisión del Lobby
     const wantMicOn = localStorage.getItem('initial_mic') === 'true';
     const wantCamOn = localStorage.getItem('initial_cam') === 'true';
 
@@ -121,6 +114,14 @@ export class LivekitService {
     if (!this.room) return false;
     const newState = !this.room.localParticipant.isCameraEnabled;
     await this.room.localParticipant.setCameraEnabled(newState);
+    return newState;
+  }
+
+  // NUEVO: Función para compartir pantalla
+  async toggleScreenShare(): Promise<boolean> {
+    if (!this.room) return false;
+    const newState = !this.room.localParticipant.isScreenShareEnabled;
+    await this.room.localParticipant.setScreenShareEnabled(newState);
     return newState;
   }
 

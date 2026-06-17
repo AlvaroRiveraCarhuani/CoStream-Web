@@ -33,7 +33,7 @@ export class Room implements OnInit, OnDestroy {
   isCameraOff = localStorage.getItem('initial_cam') !== 'true';
   isScreenSharing = false;
   dropdownOpen = false;
-  showParticipants = false; // Por defecto cerrado en móvil
+  showParticipants = false;
   showChat = false;
   socketConnected = false;
 
@@ -70,15 +70,12 @@ export class Room implements OnInit, OnDestroy {
 
           this.isHost = (roomData.creatorId === this.currentUserId);
 
-          // NUEVO: Lógica unificada para Anfitriones e Invitados
           const currentUser = this.authService.currentUser();
           const guestName = localStorage.getItem('guest_name');
           
-          // Generamos una ID aleatoria si es un invitado sin cuenta
           const userId = currentUser ? (currentUser.sub || currentUser.id) : ('guest_' + Math.random().toString(36).substr(2, 9));
           const finalName = currentUser ? (currentUser.displayName || currentUser.email?.split('@')[0]) : (guestName || 'Invitado');
 
-          // Agregamos al usuario local a la lista (sea Host o Guest)
           this.roomState.participants.set([{
             userId: userId,
             name: finalName,
@@ -117,12 +114,12 @@ export class Room implements OnInit, OnDestroy {
 
   toggleParticipantsPanel() {
     this.showParticipants = !this.showParticipants;
-    if (this.showParticipants) this.showChat = false; // Solo uno a la vez en móvil
+    if (this.showParticipants) this.showChat = false;
   }
 
   toggleChat() {
     this.showChat = !this.showChat;
-    if (this.showChat) this.showParticipants = false; // Solo uno a la vez en móvil
+    if (this.showChat) this.showParticipants = false;
   }
 
   async toggleMute() {
@@ -137,8 +134,11 @@ export class Room implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  toggleScreenShare() {
-    this.isScreenSharing = !this.isScreenSharing;
+  // NUEVO: Ahora utiliza LiveKit para compartir la pantalla real
+  async toggleScreenShare() {
+    const newState = await this.livekitService.toggleScreenShare();
+    this.isScreenSharing = newState;
+    this.cdr.detectChanges();
   }
 
   leaveRoom() {
@@ -191,7 +191,6 @@ export class Room implements OnInit, OnDestroy {
     this.dropdownOpen = false;
   }
 
-  // ========== MÉTODOS DE MODERACIÓN ==========
   muteRemoteParticipant(targetUserId: string, mute: boolean) {
     if (!this.isHost) return;
     this.roomState.sendModCommand('mod:set_microphone', {
