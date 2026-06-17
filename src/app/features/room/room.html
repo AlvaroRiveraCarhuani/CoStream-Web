@@ -8,9 +8,6 @@
       </span>
     </div>
     <div class="header-actions">
-      <button class="btn-icon" (click)="toggleParticipantsPanel()" title="Participantes">
-        <span class="material-symbols-outlined">group</span>
-      </button>
       <div class="dropdown">
         <button class="btn-icon" (click)="toggleDropdown()">more_vert</button>
         <div class="dropdown-menu" *ngIf="dropdownOpen">
@@ -138,7 +135,7 @@
     </main>
 
     <aside class="sidebar-panel" [class.collapsed]="!showChat">
-      <div class="panel-header mobile-only">
+      <div class="panel-header">
         <h3>Chat</h3>
         <button class="btn-close" (click)="toggleChat()">
           <span class="material-symbols-outlined">close</span>
