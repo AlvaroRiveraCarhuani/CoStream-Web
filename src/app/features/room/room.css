@@ -1,12 +1,13 @@
-/* ========== CONTENEDOR PRINCIPAL DINÁMICO ========== */
+/* ========== CONTENEDOR PRINCIPAL ========== */
 .studio-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height — respeta la barra del navegador móvil */
   background: #0f172a;
   color: #f1f5f9;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  overflow: hidden; /* VITAL: Bloquea el scroll de toda la página */
+  overflow: hidden;
 }
 
 /* ========== HEADER ========== */
@@ -15,7 +16,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 24px;
-  height: 64px;
+  height: 56px;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid #1e293b;
@@ -30,8 +31,8 @@
 }
 
 .pulse-indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background-color: #10b981;
   border-radius: 50%;
   box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
@@ -45,7 +46,7 @@
 }
 
 .room-info h2 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 500;
   margin: 0;
 }
@@ -63,7 +64,7 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   position: relative;
 }
 
@@ -117,14 +118,13 @@
 .dropdown-menu button:hover { background: #334155; }
 .dropdown-menu .material-symbols-outlined { font-size: 20px; }
 
-/* ========== MAIN LAYOUT ========== */
+/* ========== MAIN LAYOUT — 3 columnas ========== */
 .main-layout {
   display: flex;
   flex: 1;
-  gap: 0;
-  height: calc(100vh - 64px);
-  overflow: hidden; /* VITAL: Aísla las 3 columnas para que no se desborden */
+  overflow: hidden;
   position: relative;
+  min-height: 0; /* Candado flexbox: permite que los hijos se encojan */
 }
 
 /* ========== PANEL DE PARTICIPANTES ========== */
@@ -134,7 +134,7 @@
   border-right: 1px solid #334155;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease, opacity 0.3s, transform 0.3s;
+  transition: width 0.3s ease, opacity 0.2s;
   overflow: hidden;
   flex-shrink: 0;
   z-index: 40;
@@ -152,6 +152,7 @@
   align-items: center;
   padding: 16px;
   border-bottom: 1px solid #334155;
+  flex-shrink: 0;
 }
 .panel-header h3 { margin: 0; font-size: 1rem; font-weight: 500; color: #cbd5e1; }
 
@@ -195,7 +196,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0; /* Evita que nombres largos rompan el contenedor */
+  min-width: 0;
 }
 
 .participant-name {
@@ -246,45 +247,45 @@
   background: #0f172a;
   overflow: hidden;
   min-width: 0;
-  position: relative;
+  min-height: 0; /* Candado flexbox */
 }
 
+/* ========== GRID DE CÁMARAS (LIVEKIT) ========== */
 .livekit-videos {
   flex: 1;
   display: flex;
-  flex-direction: column;
   background: #000;
-  padding: 16px;
-  overflow-y: auto;
-  position: relative;
+  padding: 12px;
+  overflow: hidden; /* Sin scroll — los videos se ajustan al espacio */
+  min-height: 0; /* Candado flexbox */
 }
 
 .video-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px;
   justify-content: center;
   align-content: center;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
 }
 
 .remote-videos-wrapper {
-  display: contents; /* Desaparece el div intermedio, une los videos remotos al flujo flexbox */
+  display: contents;
 }
 
-/* Regla universal para TODAS las cámaras */
 .local-video-wrapper,
 .remote-videos-wrapper video {
   position: relative;
   background: #111827;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   border: 1px solid #334155;
   aspect-ratio: 16/9;
   object-fit: cover;
-  flex: 1 1 300px; 
-  max-width: 450px; 
+  flex: 1 1 280px;
+  max-width: 500px;
+  max-height: 100%; /* CLAVE: nunca más alto que el contenedor */
 }
 
 .local-video-wrapper video {
@@ -322,24 +323,27 @@
   backdrop-filter: blur(4px);
 }
 
-/* ========== BARRA DE CONTROLES ZOOM STYLE ========== */
+/* ========== BACKSTAGE (app-stage wrapper) ========== */
+.backstage-wrapper {
+  flex-shrink: 0;
+}
+
+/* ========== BARRA DE CONTROLES — ZOOM STYLE ========== */
 .controls-bar {
   flex-shrink: 0;
-  padding: 12px 24px;
+  padding: 8px 16px;
   background: #111827;
   border-top: 1px solid #1e293b;
   display: flex;
   justify-content: center;
   z-index: 50;
-  width: 100%;
   box-sizing: border-box;
 }
 
 .control-buttons {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
-  flex-wrap: nowrap;
 }
 
 .btn-control {
@@ -351,10 +355,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-radius: 8px;
   transition: all 0.2s;
-  min-width: 72px;
+  min-width: 64px;
 }
 
 .btn-control:hover { background: #1f2937; color: white; }
@@ -362,14 +366,14 @@
 .btn-control.danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .btn-control.active { color: #10b981; }
 
-.btn-control .material-symbols-outlined { font-size: 24px; margin-bottom: 4px; }
-.btn-control .btn-label { font-size: 0.75rem; font-weight: 500; white-space: nowrap; }
+.btn-control .material-symbols-outlined { font-size: 22px; margin-bottom: 2px; }
+.btn-control .btn-label { font-size: 0.7rem; font-weight: 500; white-space: nowrap; }
 
 .btn-control.leave {
   background: #ef4444;
   color: white;
-  margin-left: 16px;
-  padding: 8px 24px;
+  margin-left: 8px;
+  padding: 6px 20px;
 }
 .btn-control.leave:hover { background: #dc2626; color: white; }
 
@@ -380,7 +384,7 @@
   border-left: 1px solid #1e293b;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease, opacity 0.3s, transform 0.3s;
+  transition: width 0.3s ease, opacity 0.2s;
   overflow: hidden;
   flex-shrink: 0;
   z-index: 40;
@@ -397,6 +401,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0; /* Candado flexbox */
 }
 
 .crown { font-size: 0.85rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
@@ -405,7 +410,7 @@
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center; z-index: 100;
+  display: flex; align-items: center; justify-content: center; z-index: 200;
 }
 .modal {
   background: #1e293b; border-radius: 16px; padding: 24px; width: 90%; max-width: 400px;
@@ -418,112 +423,154 @@
 .btn-danger-solid { background: #ef4444; color: white; border: none; font-weight: 500; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
 .btn-danger-solid:hover { background: #dc2626; }
 
-.toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; }
+.toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 300; }
 .toast {
   background: #1e293b; color: white; padding: 12px 24px; border-radius: 8px;
   display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #334155;
 }
 
-/* ========== RESPONSIVIDAD (MÓVIL) ========== */
+
+/* ===================================================================
+   RESPONSIVIDAD MÓVIL — layout inmersivo tipo Zoom/StreamYard
+   =================================================================== */
 @media (max-width: 768px) {
-  /* En móvil, los sidebars flotan sobre el contenido para no aplastarlo */
-  
+
+  .studio-container {
+    height: 100vh;
+    height: 100dvh;
+  }
+
   .mobile-only {
     display: flex;
   }
 
-  .room-header { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    z-index: 30;
-    background: rgba(15, 23, 42, 0.7);
-    border-bottom: none;
+  /* ---- Header: compacto y siempre visible ---- */
+  .room-header {
+    height: 48px;
+    padding: 0 12px;
   }
 
   .room-info h2 {
-    font-size: 1rem;
-    max-width: 120px;
+    font-size: 0.9rem;
+    max-width: 100px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  /* ---- Layout: columna vertical, sin scroll global ---- */
   .main-layout {
-    height: 100vh; /* Ocupa todo el espacio de pantalla disponible */
+    flex-direction: column;
   }
 
+  /* ---- Pantalla principal: ocupa todo el espacio entre header y controles ---- */
   .main-screen {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    /* Dejar espacio para la barra de abajo y el header de arriba */
-    padding-top: 64px; 
-    padding-bottom: 80px; 
-    box-sizing: border-box;
+    flex: 1;
+    min-height: 0;
   }
 
   .livekit-videos {
-    padding: 0;
-  }
-  
-  .video-container {
-    gap: 4px;
-    align-content: stretch;
-  }
-  
-  .local-video-wrapper,
-  .remote-videos-wrapper video {
-    border-radius: 0;
-    border: none;
-    max-width: 100%; 
+    padding: 4px;
   }
 
+  .video-container {
+    gap: 4px;
+  }
+
+  .local-video-wrapper,
+  .remote-videos-wrapper video {
+    border-radius: 4px;
+    border: none;
+    box-shadow: none;
+    max-width: 100%;
+    flex: 1 1 45%; /* 2 videos por fila en móvil */
+  }
+
+  /* ---- Barra de controles: FIJA abajo, siempre visible ---- */
   .controls-bar {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 8px;
-    justify-content: space-evenly;
-    background: rgba(15, 23, 42, 0.95);
+    padding: 6px 8px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); /* Safe area iOS */
+    background: rgba(17, 24, 39, 0.97);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #1e293b;
+    z-index: 150;
   }
 
   .control-buttons {
     width: 100%;
-    justify-content: space-between;
-    gap: 4px;
+    justify-content: space-evenly;
+    gap: 0;
   }
 
   .btn-control {
     min-width: 0;
-    flex: 1;
-    padding: 6px 4px;
+    padding: 4px 6px;
+    flex: 0 1 auto;
   }
+
+  .btn-control .material-symbols-outlined { font-size: 20px; }
+  .btn-control .btn-label { font-size: 0.6rem; }
 
   .btn-control.leave {
-    margin-left: 0;
-    padding: 6px 12px;
+    margin-left: 4px;
+    padding: 4px 14px;
   }
 
-  /* Paneles flotantes (Drawers) */
+  /* ---- El main-screen necesita padding-bottom para no taparlo la barra fija ---- */
+  .main-screen {
+    padding-bottom: 70px; /* Espacio para la barra de controles fija */
+  }
+
+  /* ---- Backstage en móvil ---- */
+  .backstage-wrapper {
+    max-height: 100px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  /* ---- Drawers (Participantes y Chat) — paneles de pantalla completa ---- */
   .participants-panel,
   .sidebar-panel {
-    position: absolute;
+    position: fixed;
     top: 0;
-    left: 0;
+    right: 0;
     width: 100%;
     height: 100%;
-    z-index: 100;
+    height: 100dvh;
+    z-index: 200;
     background: #0f172a;
     border: none;
+    transition: transform 0.3s ease;
     transform: translateX(0);
   }
 
   .participants-panel.collapsed,
   .sidebar-panel.collapsed {
-    transform: translateX(100%); /* Lo esconde hacia la derecha */
+    transform: translateX(100%);
     width: 100%;
-    opacity: 1; /* No usamos opacity para el efecto slide */
+    opacity: 1;
+  }
+
+  /* El chat dentro del drawer necesita respetar safe-area */
+  .sidebar-panel .chat-component {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* ========== TABLET (768px – 1024px) ========== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .participants-panel {
+    width: 220px;
+  }
+  .sidebar-panel {
+    width: 260px;
+  }
+  .btn-control {
+    min-width: 56px;
+    padding: 6px 8px;
   }
 }

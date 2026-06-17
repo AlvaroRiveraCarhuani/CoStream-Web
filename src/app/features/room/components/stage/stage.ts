@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RoomStateService } from '../../services/room-state.service';
 
 @Component({
   selector: 'app-stage',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './stage.html',
   styleUrls: ['./stage.css']
 })
