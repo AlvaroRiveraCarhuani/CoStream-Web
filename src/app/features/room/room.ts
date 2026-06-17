@@ -192,14 +192,26 @@ export class Room implements OnInit, OnDestroy {
 
   confirmLeaveRoom() {
     this.showLeaveModal = false;
-    if (this.roomState['socket']) {
-      this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
-    }
     this.roomApi.endRoom(this.roomId).subscribe({
       next: () => {
-        this.cleanupAndNavigate();
+        // La sala ya está inactiva en la BD
+        if (this.roomState['socket']) {
+          this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
+          
+          // Desconectar inmediatamente el socket para que el Host NO reciba el 'room:kicked'
+          // que él mismo acaba de emitir (eso causaría un reload de página y cancelaría cosas)
+          setTimeout(() => {
+             this.cleanupAndNavigate();
+          }, 100);
+        } else {
+          this.cleanupAndNavigate();
+        }
       },
-      error: () => {}
+      error: (err) => {
+        console.error('Error finalizando la sala en la BD:', err);
+        // Intentar salir de todos modos
+        this.cleanupAndNavigate();
+      }
     });
   }
 
