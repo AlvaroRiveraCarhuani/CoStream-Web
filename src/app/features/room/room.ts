@@ -36,6 +36,12 @@ export class Room implements OnInit, OnDestroy {
   showParticipants = true;
   socketConnected = false;
 
+  showLeaveModal = false;
+  showKickModal = false;
+  participantToKick: string | null = null;
+  showToast = false;
+  toastMessage = '';
+
   get currentUserId(): string {
     const user = this.authService.currentUser();
     return user?.sub || user?.id || '';
@@ -56,8 +62,8 @@ export class Room implements OnInit, OnDestroy {
       this.roomApi.getRoomStatus(this.roomId).subscribe({
         next: (roomData) => {
           if (!roomData.exists) {
-            alert('Esta sala ya no existe o ha finalizado.');
-            this.router.navigate(['/dashboard']);
+            this.displayToast('Esta sala ya no existe o ha finalizado.');
+            setTimeout(() => this.router.navigate(['/dashboard']), 1500);
             return;
           }
 
@@ -130,17 +136,7 @@ export class Room implements OnInit, OnDestroy {
 
   leaveRoom() {
     if (this.isHost) {
-      if (confirm('¿Finalizar la transmisión? Se expulsará a todos los participantes.')) {
-        if (this.roomState['socket']) {
-          this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
-        }
-        this.roomApi.endRoom(this.roomId).subscribe({
-          next: () => {
-            this.cleanupAndNavigate();
-          },
-          error: () => {}
-        });
-      }
+      this.showLeaveModal = true;
     } else {
       this.cleanupAndNavigate();
     }
@@ -154,9 +150,30 @@ export class Room implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard']);
   }
 
+  confirmLeaveRoom() {
+    this.showLeaveModal = false;
+    if (this.roomState['socket']) {
+      this.roomState['socket'].emit('room:end_broadcast', { roomId: this.roomId });
+    }
+    this.roomApi.endRoom(this.roomId).subscribe({
+      next: () => {
+        this.cleanupAndNavigate();
+      },
+      error: () => {}
+    });
+  }
+
   copyRoomLink() {
     const url = `${window.location.origin}/join/${this.roomId}`;
-    navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'));
+    navigator.clipboard.writeText(url).then(() => this.displayToast('Enlace copiado'));
+  }
+
+  displayToast(msg: string) {
+    this.toastMessage = msg;
+    this.showToast = true;
+    setTimeout(() => {
+      this.showToast = false;
+    }, 2500);
   }
 
   toggleDropdown() {
@@ -188,12 +205,19 @@ export class Room implements OnInit, OnDestroy {
 
   kickParticipant(targetUserId: string) {
     if (!this.isHost) return;
-    if (confirm('¿Expulsar a este participante?')) {
+    this.participantToKick = targetUserId;
+    this.showKickModal = true;
+  }
+
+  confirmKick() {
+    if (this.participantToKick) {
       this.roomState.sendModCommand('mod:kick', {
         roomId: this.roomId,
-        targetUserId
+        targetUserId: this.participantToKick
       });
+      this.participantToKick = null;
     }
+    this.showKickModal = false;
   }
 
   @HostListener('document:click', ['$event'])

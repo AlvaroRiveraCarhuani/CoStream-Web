@@ -80,6 +80,6 @@ export class AuthService {
   private clearLocalSession(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.currentUser.set(null);
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 }

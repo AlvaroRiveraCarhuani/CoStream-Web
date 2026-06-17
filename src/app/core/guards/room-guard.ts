@@ -29,7 +29,12 @@ export const roomGuard: CanActivateFn = (route, state) => {
 
       // Si la sala NO existe o está inactiva, al Dashboard
       if (!room.exists) {
-        alert('Esta sala no existe o ya ha finalizado.');
+        const toast = document.createElement('div');
+        toast.className = 'toast-container';
+        toast.innerHTML = `<div class="toast"><span class="material-symbols-outlined" style="color: #ef4444;">error</span><span>Esta sala no existe o ya ha finalizado.</span></div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+        
         return router.createUrlTree(['/dashboard']);
       }
 

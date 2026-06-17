@@ -79,7 +79,12 @@ export class RoomStateService {
     });
 
     this.socket.on('room:kicked', () => {
-      alert('El anfitrión ha finalizado la transmisión.');
+      const toast = document.createElement('div');
+      toast.className = 'toast-container';
+      toast.innerHTML = `<div class="toast"><span class="material-symbols-outlined" style="color: #ef4444;">error</span><span>El anfitrión ha finalizado la transmisión.</span></div>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+
       this.zone.run(() => {
         this.disconnect();
         window.location.href = '/dashboard';

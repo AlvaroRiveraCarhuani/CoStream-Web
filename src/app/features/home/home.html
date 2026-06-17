@@ -33,7 +33,7 @@
           <button class="btn-primary" (click)="goToMyRoom(myRoom.id)">Ir al Estudio</button>
           
           <button class="btn-copy" (click)="copyRoomLink(myRoom.id, $event)">
-            <span class="icon">📋</span>
+            <span class="icon material-symbols-outlined" style="font-size: 1.2rem;">content_copy</span>
             <span class="label">Copiar Link</span>
           </button>
           <button class="btn-danger" (click)="endActiveRoom(myRoom.id)" style="background-color: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-left: auto; transition: all 0.2s;">
@@ -56,7 +56,7 @@
           <div class="actions">
             <button class="btn-primary" (click)="openJoinModal(room.id)">Unirse</button>
             <button class="btn-copy" (click)="copyRoomLink(room.id, $event)">
-              <span class="icon">📋</span>
+              <span class="icon material-symbols-outlined" style="font-size: 1.2rem;">content_copy</span>
               <span class="label">Copiar Link</span>
             </button>
           </div>
@@ -131,6 +131,17 @@
           <button type="submit" class="btn-primary" [disabled]="joinForm.invalid">Entrar</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="roomToConfirmEnd">
+    <div class="modal">
+      <h3>¿Finalizar la transmisión?</h3>
+      <p style="margin-bottom: 1rem; color: #94a3b8; font-size: 0.95rem;">Se expulsará a todos los invitados y se cerrará la sala activa.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-text" (click)="cancelEndActiveRoom()">Cancelar</button>
+        <button type="button" class="btn-primary" style="background-color: #ef4444;" (click)="confirmEndActiveRoom()">Aceptar</button>
+      </div>
     </div>
   </div>
 </div>

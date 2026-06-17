@@ -148,10 +148,15 @@ export class Home implements OnInit {
     this.router.navigate(['/room', roomId]);
   }
 
-  // 2. Matar la sala manualmente desde el Dashboard
+  roomToConfirmEnd: string | null = null;
+
   endActiveRoom(roomId: string) {
-    if (confirm('¿Estás seguro de finalizar esta transmisión? Se expulsará a todos los invitados.')) {
-      this.roomApi.endRoom(roomId).subscribe({
+    this.roomToConfirmEnd = roomId;
+  }
+
+  confirmEndActiveRoom() {
+    if (this.roomToConfirmEnd) {
+      this.roomApi.endRoom(this.roomToConfirmEnd).subscribe({
         next: () => {
           this.roomApi.myActiveRoom.set(null); 
           // Refrescamos el historial para que aparezca ahí
@@ -159,6 +164,11 @@ export class Home implements OnInit {
         },
         error: (err) => console.error('Error al cerrar sala', err)
       });
+      this.roomToConfirmEnd = null;
     }
+  }
+
+  cancelEndActiveRoom() {
+    this.roomToConfirmEnd = null;
   }
 }

@@ -116,4 +116,36 @@
       <app-chat [roomId]="roomId" class="chat-component"></app-chat>
     </aside>
   </div>
+
+  <!-- Modal Abandonar Sala -->
+  <div class="modal-overlay" *ngIf="showLeaveModal">
+    <div class="modal">
+      <h3>¿Finalizar la transmisión?</h3>
+      <p style="margin-bottom: 1rem; color: #94a3b8; font-size: 0.95rem;">Se expulsará a todos los participantes.</p>
+      <div class="modal-actions">
+        <button class="btn-text" (click)="showLeaveModal = false">Cancelar</button>
+        <button class="btn-danger-solid" (click)="confirmLeaveRoom()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Expulsar Participante -->
+  <div class="modal-overlay" *ngIf="showKickModal">
+    <div class="modal">
+      <h3>¿Expulsar a este participante?</h3>
+      <p style="margin-bottom: 1rem; color: #94a3b8; font-size: 0.95rem;">El usuario será retirado permanentemente de la sala.</p>
+      <div class="modal-actions">
+        <button class="btn-text" (click)="showKickModal = false; participantToKick = null">Cancelar</button>
+        <button class="btn-danger-solid" (click)="confirmKick()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" *ngIf="showToast">
+    <div class="toast">
+      <span class="material-symbols-outlined">info</span>
+      <span>{{ toastMessage }}</span>
+    </div>
+  </div>
 </div>
