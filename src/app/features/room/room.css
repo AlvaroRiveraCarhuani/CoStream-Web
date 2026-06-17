@@ -261,8 +261,8 @@
   gap: 8px;
   /* Modo por defecto: la tira de thumbnails ocupa todo el espacio */
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
   transition: all 0.3s ease;
 }
 
@@ -336,14 +336,23 @@
   min-height: 0;
 }
 
-/* En modo grid normal: la tira es horizontal y ocupa todo el espacio */
+/*
+ * ══════════════════════════════════════════════════════════════
+ * MODO GRID NORMAL (sin screen share) — Layout tipo Zoom
+ * Usa CSS Grid con auto-fit para crear tiles adaptativos
+ * que se redistribuyen según el espacio disponible.
+ * ══════════════════════════════════════════════════════════════
+ */
 .video-layout:not(.spotlight-mode) .thumbnail-strip {
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 8px;
   flex: 1;
-  overflow: visible;
+  align-content: center;
+  justify-items: center;
+  overflow: auto;
+  padding: 4px;
 }
 
 /* En modo spotlight: la tira es vertical a la derecha, ancho fijo */
@@ -362,10 +371,10 @@
   overflow: hidden;
 }
 
-/* En modo grid normal: crece libre */
+/* En modo grid normal: llena su celda */
 .video-layout:not(.spotlight-mode) .local-video-wrapper {
-  flex: 1 1 280px;
-  max-width: 500px;
+  width: 100%;
+  max-width: 640px;
   aspect-ratio: 16/9;
 }
 
@@ -406,13 +415,12 @@
   display: block;
 }
 
-/* En modo grid: el video remoto crece libre */
+/* En modo grid: el video remoto llena su celda */
 .video-layout:not(.spotlight-mode) .remote-thumbnail,
 .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
-  flex: 1 1 280px;
-  max-width: 500px;
+  width: 100%;
+  max-width: 640px;
   aspect-ratio: 16/9;
-  max-height: 100%;
 }
 
 /* En modo spotlight: thumbnail fijo */
@@ -602,7 +610,14 @@
     gap: 4px;
   }
 
-  /* En móvil sin spotlight: grid de 2 columnas */
+  /* En móvil sin spotlight: grid de 2 columnas compactas */
+  .video-layout:not(.spotlight-mode) .thumbnail-strip {
+    grid-template-columns: repeat(2, 1fr);
+    align-content: center;
+    gap: 4px;
+    padding: 4px;
+  }
+
   .video-layout:not(.spotlight-mode) .local-video-wrapper,
   .video-layout:not(.spotlight-mode) .remote-thumbnail,
   .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
@@ -610,7 +625,7 @@
     border: none;
     box-shadow: none;
     max-width: 100%;
-    flex: 1 1 45%;
+    width: 100%;
   }
 
   /* En móvil con spotlight: layout vertical (spotlight arriba, strip abajo) */

@@ -109,7 +109,6 @@ export class RoomStateService {
     
     // Escucha cuando el anfitrión fuerza el estado del micrófono
     this.socket.on('force_microphone', (data: { enabled: boolean }) => {
-      console.log('force_microphone recibido:', data);
       this.zone.run(async () => {
         // Al llamar a setMicrophoneEnabled, se dispara el callback onMuteStatusChange
         // que actualiza el botón en room.ts
@@ -119,7 +118,6 @@ export class RoomStateService {
 
     // Escucha cuando el anfitrión fuerza el estado de la cámara
     this.socket.on('force_camera', (data: { enabled: boolean }) => {
-      console.log('force_camera recibido:', data);
       this.zone.run(async () => {
         await this.livekitService.setCameraEnabled(data.enabled);
       });

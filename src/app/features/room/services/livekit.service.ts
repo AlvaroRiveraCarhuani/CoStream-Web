@@ -100,9 +100,11 @@ export class LivekitService {
     });
 
     // ──────────────────────────────────────────────────────────────────
-    // Track local des-publicado (se dejó de compartir pantalla)
+    // Track local des-publicado
     // ──────────────────────────────────────────────────────────────────
     this.room.on(RoomEvent.LocalTrackUnpublished, (publication: LocalTrackPublication) => {
+      if (publication.kind !== Track.Kind.Video) return;
+
       if (publication.source === Track.Source.ScreenShare) {
         if (this.spotlightVideoElement) {
           publication.track?.detach(this.spotlightVideoElement);
@@ -110,6 +112,13 @@ export class LivekitService {
         }
         if (this.onScreenShareChange) {
           this.onScreenShareChange(false, true);
+        }
+      } else if (publication.source === Track.Source.Camera) {
+        // Bug fix: el soft-reset apaga la cámara brevemente → limpiar el elemento
+        // para evitar un frame congelado mientras el track se re-publica
+        if (this.localVideoElement) {
+          publication.track?.detach(this.localVideoElement);
+          // NO ponemos srcObject = null — LiveKit lo gestiona internamente
         }
       }
     });
@@ -136,6 +145,7 @@ export class LivekitService {
             videoEl.playsInline = true;
             videoEl.className = 'remote-thumbnail';
             videoEl.setAttribute('data-participant-id', participant.identity);
+            videoEl.setAttribute('data-track-sid', track.sid || '');
             videoEl.setAttribute('data-track-source', publication.source || 'camera');
             track.attach(videoEl);
             this.remoteVideoContainer!.appendChild(videoEl);
@@ -144,6 +154,7 @@ export class LivekitService {
           const audioEl = document.createElement('audio');
           audioEl.autoplay = true;
           audioEl.setAttribute('data-participant-audio-id', participant.identity);
+          audioEl.setAttribute('data-track-sid', track.sid || '');
           track.attach(audioEl);
           this.remoteVideoContainer!.appendChild(audioEl);
         }
@@ -167,13 +178,13 @@ export class LivekitService {
             }
           } else {
             const el = this.remoteVideoContainer!.querySelector(
-              `[data-participant-id="${participant.identity}"]`
+              `[data-track-sid="${track.sid || ''}"]`
             );
             if (el) el.remove();
           }
         } else if (track.kind === Track.Kind.Audio) {
           const audioEl = this.remoteVideoContainer!.querySelector(
-            `[data-participant-audio-id="${participant.identity}"]`
+            `[data-track-sid="${track.sid || ''}"]`
           );
           if (audioEl) audioEl.remove();
         }
@@ -182,20 +193,25 @@ export class LivekitService {
 
     // ──────────────────────────────────────────────────────────────────
     // Participante remoto desconectado: limpiar todos sus elementos
+    // Usamos data-participant-id para videos y data-participant-audio-id
+    // para audios. TrackUnsubscribed usa data-track-sid; aquí limpiamos
+    // lo que quede por si el participante se desconectó abruptamente
+    // sin emitir TrackUnsubscribed.
     // ──────────────────────────────────────────────────────────────────
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
-      const videos = this.remoteVideoContainer!.querySelectorAll(
-        `[data-participant-id="${participant.identity}"]`
-      );
-      videos.forEach((v) => v.remove());
-      const audios = this.remoteVideoContainer!.querySelectorAll(
-        `[data-participant-audio-id="${participant.identity}"]`
-      );
-      audios.forEach((a) => a.remove());
+      if (!this.remoteVideoContainer) return;
+      // Videos: buscamos por data-participant-id (puede ya no existir si
+      // TrackUnsubscribed los limpió por track.sid — esto es safe)
+      this.remoteVideoContainer
+        .querySelectorAll(`[data-participant-id="${participant.identity}"]`)
+        .forEach((el) => el.remove());
+      // Audios: buscamos por data-participant-audio-id
+      this.remoteVideoContainer
+        .querySelectorAll(`[data-participant-audio-id="${participant.identity}"]`)
+        .forEach((el) => el.remove());
     });
 
     await this.room.connect(this.livekitUrl, token);
-    console.log('Conectado a LiveKit');
   }
 
   // ──────────────────────────────────────────────────────────────────
