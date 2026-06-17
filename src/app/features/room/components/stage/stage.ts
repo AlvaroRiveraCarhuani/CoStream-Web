@@ -11,13 +11,13 @@ import { RoomStateService } from '../../services/room-state.service';
 })
 export class Stage {
   @Input() isHost: boolean = false;
+  @Input() roomId: string = '';
   protected roomState = inject(RoomStateService);
 
-  promoteToStage(userId: string) {
-    this.roomState.sendModCommand('room:promote', { userId });
-  }
-
   subirAlEscenario(userId: string) {
-    this.promoteToStage(userId);
+    this.roomState.sendModCommand('mod:promote', {
+      roomId: this.roomId,
+      targetUserId: userId,
+    });
   }
 }
