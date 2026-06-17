@@ -344,15 +344,16 @@
  * ══════════════════════════════════════════════════════════════
  */
 .video-layout:not(.spotlight-mode) .thumbnail-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 8px;
-  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   align-content: center;
-  justify-items: center;
+  gap: 16px;
+  flex: 1;
   overflow: auto;
-  padding: 4px;
+  padding: 16px;
+  height: 100%;
 }
 
 /* En modo spotlight: la tira es vertical a la derecha, ancho fijo */
@@ -371,11 +372,26 @@
   overflow: hidden;
 }
 
-/* En modo grid normal: llena su celda */
-.video-layout:not(.spotlight-mode) .local-video-wrapper {
-  width: 100%;
-  max-width: 640px;
+/* En modo grid normal: videos dinámicos y adaptativos */
+.video-layout:not(.spotlight-mode) .local-video-wrapper,
+.video-layout:not(.spotlight-mode) .remote-thumbnail,
+.video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
+  flex: 1 1 300px;
+  max-width: calc(100% - 16px);
   aspect-ratio: 16/9;
+  max-height: calc(50vh - 40px); /* Previene apilamiento gigante vertical */
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border: 1px solid #334155;
+  margin: 0;
+}
+
+/* Si solo hay un video en la pantalla, que ocupe más espacio */
+.video-layout:not(.spotlight-mode) .local-video-wrapper:only-child,
+.video-layout:not(.spotlight-mode) .remote-videos-wrapper:only-child video {
+  max-width: 800px;
+  max-height: calc(80vh - 40px);
 }
 
 /* En modo spotlight: thumbnail fijo */
@@ -413,14 +429,6 @@
   border: 1px solid #334155;
   object-fit: cover;
   display: block;
-}
-
-/* En modo grid: el video remoto llena su celda */
-.video-layout:not(.spotlight-mode) .remote-thumbnail,
-.video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
-  width: 100%;
-  max-width: 640px;
-  aspect-ratio: 16/9;
 }
 
 /* En modo spotlight: thumbnail fijo */
@@ -610,22 +618,25 @@
     gap: 4px;
   }
 
-  /* En móvil sin spotlight: grid de 2 columnas compactas */
+  /* En móvil sin spotlight: grid adaptable */
   .video-layout:not(.spotlight-mode) .thumbnail-strip {
-    grid-template-columns: repeat(2, 1fr);
-    align-content: center;
-    gap: 4px;
-    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
   }
 
   .video-layout:not(.spotlight-mode) .local-video-wrapper,
   .video-layout:not(.spotlight-mode) .remote-thumbnail,
   .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
-    border-radius: 4px;
+    border-radius: 8px;
     border: none;
-    box-shadow: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     max-width: 100%;
     width: 100%;
+    flex: 0 1 auto;
   }
 
   /* En móvil con spotlight: layout vertical (spotlight arriba, strip abajo) */
