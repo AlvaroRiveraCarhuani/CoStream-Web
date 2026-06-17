@@ -4,15 +4,15 @@
 
 Este repositorio contiene la aplicación cliente (Frontend) desarrollada con **Angular**.
 
-## 🚀 Tecnologías Principales
+## Tecnologías Principales
 
-- **Framework:** Angular 17+ (Standalone Components)
-- **WebRTC & Video:** [LiveKit Client](https://livekit.io/)
-- **Tiempo Real:** Socket.io Client
+- **Framework:** Angular 21+ (Standalone Components)
+- **WebRTC & Video:** LiveKit Client (v2.19+)
+- **Tiempo Real:** Socket.io Client (v4.8+)
 - **Estilos:** Vanilla CSS con CSS Grid / Flexbox
 - **Validación:** Angular Reactive Forms
 
-## ✨ Características
+## Características
 
 - **Estudio de Transmisión (Room):** Integración completa con LiveKit para audio, video y uso compartido de pantalla (Screen Share).
 - **Layout Adaptativo (Zoom-like):** Cuadrícula asimétrica (`CSS Grid`) que se re-calcula en tiempo real según la cantidad de participantes y si hay pantalla compartida activa.
@@ -20,7 +20,7 @@ Este repositorio contiene la aplicación cliente (Frontend) desarrollada con **A
 - **Controles de Anfitrión:** Permisos avanzados para el host (apagar cámara/micrófono de terceros, expulsar participantes, forzar estado de media).
 - **Diseño Responsivo:** UI optimizada tanto para escritorio como para dispositivos móviles (layouts de 2 columnas).
 
-## 🛠️ Instalación y Configuración
+## Instalación y Configuración
 
 ### 1. Clonar el repositorio y acceder
 ```bash
@@ -53,7 +53,7 @@ ng serve
 ```
 La aplicación estará disponible en `http://localhost:4200/`.
 
-## 📦 Compilación para Producción
+## Compilación para Producción
 
 Para generar los archivos estáticos de producción:
 ```bash
@@ -61,6 +61,6 @@ npm run build
 ```
 Los artefactos se almacenarán en la carpeta `dist/costream-web`.
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es propiedad de sus creadores y está restringido a los términos y condiciones especificados por el equipo de CoStream.
