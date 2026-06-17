@@ -18,7 +18,7 @@ export class RoomJoin implements OnInit {
   private fb = inject(FormBuilder);
   private roomApi = inject(RoomApiService);
   private authService = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef); 
+  private cdr = inject(ChangeDetectorRef);
 
   roomId = '';
   status: 'loading' | 'ready' | 'not-found' = 'loading';
@@ -26,10 +26,17 @@ export class RoomJoin implements OnInit {
   user = this.authService.currentUser();
   errorMessage = '';
 
+  // Por defecto entran apagados por privacidad
+  initialMic = false;
+  initialCam = false;
+
   joinForm = this.fb.nonNullable.group({
     displayName: ['', Validators.required],
     pin: ['']
   });
+
+  toggleMic() { this.initialMic = !this.initialMic; }
+  toggleCam() { this.initialCam = !this.initialCam; }
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') || '';
@@ -74,11 +81,12 @@ export class RoomJoin implements OnInit {
       pin: formValue.pin
     }).subscribe({
       next: (res) => {
-        // 1. Guardar el token de LiveKit
         localStorage.setItem('livekit_token', res.guestToken!);
-        
-        // 2. NUEVO: Guardar el nombre del invitado para que la sala lo reconozca
         localStorage.setItem('guest_name', formValue.displayName);
+        
+        // Guardamos las decisiones de hardware
+        localStorage.setItem('initial_mic', this.initialMic.toString());
+        localStorage.setItem('initial_cam', this.initialCam.toString());
         
         this.router.navigate(['/room', this.roomId]);
       },

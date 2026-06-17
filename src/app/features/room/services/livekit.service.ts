@@ -42,7 +42,7 @@ export class LivekitService {
       }
     });
 
-    //  CORRECCIÓN: Manejar tanto Video como Audio al suscribirse
+    // CORRECCIÓN: Manejar tanto Video como Audio al suscribirse
     this.room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const videoEl = document.createElement('video');
@@ -64,7 +64,7 @@ export class LivekitService {
       }
     });
 
-    //  CORRECCIÓN: Limpiar tanto el Video como el Audio al desuscribirse
+    // CORRECCIÓN: Limpiar tanto el Video como el Audio al desuscribirse
     this.room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication, participant: RemoteParticipant) => {
       if (track.kind === Track.Kind.Video) {
         const el = this.remoteVideoContainer!.querySelector(`[data-participant-id="${participant.identity}"]`);
@@ -76,7 +76,7 @@ export class LivekitService {
       }
     });
 
-    //  CORRECCIÓN: Asegurarnos de limpiar ambos si el participante se desconecta por completo
+    // CORRECCIÓN: Asegurarnos de limpiar ambos si el participante se desconecta por completo
     this.room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
       const videos = this.remoteVideoContainer!.querySelectorAll(`[data-participant-id="${participant.identity}"]`);
       videos.forEach(v => v.remove());
@@ -89,9 +89,12 @@ export class LivekitService {
     await this.room.connect(this.livekitUrl, token);
     console.log('Conectado a LiveKit');
 
-    // PASO 3: Habilitar media LOCAL.
+    // PASO 3: Habilitar media LOCAL respetando la decisión del Lobby
+    const wantMicOn = localStorage.getItem('initial_mic') === 'true';
+    const wantCamOn = localStorage.getItem('initial_cam') === 'true';
+
     try {
-      if (!this.room.localParticipant.isMicrophoneEnabled) {
+      if (wantMicOn && !this.room.localParticipant.isMicrophoneEnabled) {
         await this.room.localParticipant.setMicrophoneEnabled(true);
       }
     } catch (micErr) {
@@ -99,7 +102,7 @@ export class LivekitService {
     }
 
     try {
-      if (!this.room.localParticipant.isCameraEnabled) {
+      if (wantCamOn && !this.room.localParticipant.isCameraEnabled) {
         await this.room.localParticipant.setCameraEnabled(true);
       }
     } catch (camErr) {

@@ -29,8 +29,8 @@ export class Room implements OnInit, OnDestroy {
   isHost = false;
   chatInput = signal('');
 
-  isMuted = false;
-  isCameraOff = false;
+  isMuted = localStorage.getItem('initial_mic') !== 'true';
+  isCameraOff = localStorage.getItem('initial_cam') !== 'true';
   isScreenSharing = false;
   dropdownOpen = false;
   showParticipants = true;
