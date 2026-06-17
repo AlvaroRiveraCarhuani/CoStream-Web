@@ -396,8 +396,8 @@
 
 /* Comportamientos base para todos los videos en la cuadrícula */
 .video-layout:not(.spotlight-mode) .local-video-wrapper,
-.video-layout:not(.spotlight-mode) .remote-thumbnail,
-.video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
+::ng-deep .video-layout:not(.spotlight-mode) .remote-thumbnail,
+::ng-deep .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
   width: 100%;
   height: auto;
   aspect-ratio: 16/9;
@@ -407,15 +407,13 @@
   border: 1px solid #334155;
   margin: 0;
   max-width: 100%;
-  max-height: calc(45vh - 20px); /* Previene que colapsen demasiado alto si la pantalla es estrecha */
 }
 
 /* Si solo hay un video, le permitimos ser más grande */
 .video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .local-video-wrapper,
-.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-thumbnail,
-.video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-videos-wrapper video {
+::ng-deep .video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-thumbnail,
+::ng-deep .video-layout:not(.spotlight-mode) .thumbnail-strip[data-participants="1"] .remote-videos-wrapper video {
   max-width: 800px;
-  max-height: calc(80vh - 40px);
 }
 
 /* En modo spotlight: thumbnail fijo */
@@ -445,8 +443,8 @@
   gap: 8px;
 }
 
-.remote-thumbnail,
-.remote-videos-wrapper video {
+::ng-deep .remote-thumbnail,
+::ng-deep .remote-videos-wrapper video {
   background: #111827;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
@@ -456,8 +454,8 @@
 }
 
 /* En modo spotlight: thumbnail fijo */
-.video-layout.spotlight-mode .remote-thumbnail,
-.video-layout.spotlight-mode .remote-videos-wrapper video {
+::ng-deep .video-layout.spotlight-mode .remote-thumbnail,
+::ng-deep .video-layout.spotlight-mode .remote-videos-wrapper video {
   width: 176px;
   aspect-ratio: 16/9;
   flex-shrink: 0;
@@ -653,8 +651,8 @@
   }
 
   .video-layout:not(.spotlight-mode) .local-video-wrapper,
-  .video-layout:not(.spotlight-mode) .remote-thumbnail,
-  .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
+  ::ng-deep .video-layout:not(.spotlight-mode) .remote-thumbnail,
+  ::ng-deep .video-layout:not(.spotlight-mode) .remote-videos-wrapper video {
     border-radius: 8px;
     border: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
@@ -678,8 +676,8 @@
   }
 
   .video-layout.spotlight-mode .local-video-wrapper,
-  .video-layout.spotlight-mode .remote-thumbnail,
-  .video-layout.spotlight-mode .remote-videos-wrapper video {
+  ::ng-deep .video-layout.spotlight-mode .remote-thumbnail,
+  ::ng-deep .video-layout.spotlight-mode .remote-videos-wrapper video {
     width: auto;
     height: 88px;
     aspect-ratio: 16/9;
